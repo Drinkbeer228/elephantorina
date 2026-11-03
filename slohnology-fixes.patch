@@ -1,0 +1,855 @@
+From a42d3f5a25b667a7c9873ecbad8744c3c1afdf75 Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Tue, 3 Nov 2026 17:43:32 +0000
+Subject: [PATCH 1/3] Fix quiz submit button, remove Quick Start block, hide
+ track dropdown on dashboard
+
+---
+ src/App.tsx                       |   1 +
+ src/components/Dashboard.tsx      |  72 +---------
+ src/components/Header.tsx         | 217 ++++++++++++++----------------
+ src/components/StepViewer.tsx     |   3 +
+ src/components/steps/QuizStep.tsx | 161 +++++++++++++++++-----
+ 5 files changed, 235 insertions(+), 219 deletions(-)
+
+diff --git a/src/App.tsx b/src/App.tsx
+index a549964..14cb7c4 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -198,6 +198,7 @@ export default function App() {
+     return (
+       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+         <Header
++          currentView="dashboard"
+           courseTitle="Главная"
+           courseIcon="Home"
+           progress={0}
+diff --git a/src/components/Dashboard.tsx b/src/components/Dashboard.tsx
+index 8810cf1..fc3a936 100644
+--- a/src/components/Dashboard.tsx
++++ b/src/components/Dashboard.tsx
+@@ -1,4 +1,4 @@
+-import { BookOpen, Brain, Shield, Rocket, CheckCircle2, Layers, HelpCircle, Stethoscope, Users, Heart, Activity } from 'lucide-react';
++import { Brain, Shield, Rocket, Users, Activity } from 'lucide-react';
+ import { Course, UserProgress } from '../types/course';
+ 
+ interface DashboardProps {
+@@ -83,7 +83,7 @@ export default function Dashboard({ courses, progressStore, onSelectCourse }: Da
+         </div>
+ 
+         {/* Courses Catalog */}
+-        <div className="mb-10">
++        <div>
+           <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
+             <Rocket className="w-6 h-6 text-[#0593C6]" />
+             Выберите учебный трек
+@@ -167,74 +167,6 @@ export default function Dashboard({ courses, progressStore, onSelectCourse }: Da
+             })}
+           </div>
+         </div>
+-
+-        {/* Quick Start Guide */}
+-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/50 shadow-lg p-6 sm:p-8">
+-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
+-            <Rocket className="w-6 h-6 text-[#D83996]" />
+-            Быстрый старт
+-          </h3>
+-          
+-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+-            {/* Theory */}
+-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#0593C6]/10 to-[#7C5CE0]/10 rounded-2xl border border-[#0593C6]/20">
+-              <BookOpen className="w-5 h-5 text-[#0593C6] shrink-0 mt-0.5" />
+-              <div>
+-                <p className="text-sm font-semibold text-[#0593C6] mb-1">Теория</p>
+-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+-                  Фундаментальные знания с клиническими рекомендациями
+-                </p>
+-              </div>
+-            </div>
+-
+-            {/* Quiz */}
+-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#7C5CE0]/10 to-[#D83996]/10 rounded-2xl border border-[#7C5CE0]/20">
+-              <HelpCircle className="w-5 h-5 text-[#7C5CE0] shrink-0 mt-0.5" />
+-              <div>
+-                <p className="text-sm font-semibold text-[#7C5CE0] mb-1">Тесты</p>
+-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+-                  Проверка знаний с мгновенной обратной связью
+-                </p>
+-              </div>
+-            </div>
+-
+-            {/* Flashcards */}
+-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#00B4D8]/10 to-[#0077B6]/10 rounded-2xl border border-[#00B4D8]/20">
+-              <Layers className="w-5 h-5 text-[#00B4D8] shrink-0 mt-0.5" />
+-              <div>
+-                <p className="text-sm font-semibold text-[#00B4D8] mb-1">Карточки</p>
+-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+-                  Интерактивные 3D-карточки для запоминания терминов
+-                </p>
+-              </div>
+-            </div>
+-
+-            {/* Scenario */}
+-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#D83996]/10 to-[#FF6B9D]/10 rounded-2xl border border-[#D83996]/20">
+-              <Stethoscope className="w-5 h-5 text-[#D83996] shrink-0 mt-0.5" />
+-              <div>
+-                <p className="text-sm font-semibold text-[#D83996] mb-1">Симуляторы</p>
+-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+-                  Клинические кейсы для тренировки мышления
+-                </p>
+-              </div>
+-            </div>
+-          </div>
+-
+-          <div className="mt-6 p-4 bg-gradient-to-r from-[#0593C6]/5 to-[#D83996]/5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50">
+-            <div className="flex items-start gap-3">
+-              <CheckCircle2 className="w-5 h-5 text-[#0593C6] shrink-0 mt-0.5" />
+-              <div>
+-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+-                  Совет
+-                </p>
+-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+-                  Прогресс автоматически сохраняется. Возвращайтесь к урокам в любое время. Кликайте на закладки, чтобы отмечать важные материалы.
+-                </p>
+-              </div>
+-            </div>
+-          </div>
+-        </div>
+       </div>
+     </div>
+   );
+diff --git a/src/components/Header.tsx b/src/components/Header.tsx
+index 6f2bc61..27f91ff 100644
+--- a/src/components/Header.tsx
++++ b/src/components/Header.tsx
+@@ -3,6 +3,8 @@ import { Trophy, Moon, Sun, ChevronDown, GraduationCap } from 'lucide-react';
+ import { Course } from '../types/course';
+ 
+ interface HeaderProps {
++  /** Текущий экран: 'dashboard' | 'lesson'. Дропдаун треков показывается только в уроке. */
++  currentView: 'dashboard' | 'lesson';
+   courseTitle: string;
+   courseIcon: string;
+   progress: number;
+@@ -33,6 +35,7 @@ function getCourseIcon(iconName: string) {
+ }
+ 
+ export default function Header({
++  currentView,
+   courseTitle,
+   progress,
+   score,
+@@ -46,6 +49,55 @@ export default function Header({
+   const [dropdownOpen, setDropdownOpen] = useState(false);
+   const currentCourse = courses.find(c => c.id === currentCourseId) || courses[0];
+ 
++  // Переключатель трека/урока нужен ТОЛЬКО внутри урока.
++  // На главной (dashboard) он дублирует большие карточки курсов — скрываем.
++  const showTrackSwitcher = currentView === 'lesson';
++
++  const renderDropdownMenu = (compact: boolean) => (
++    <>
++      <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
++      <div className={`absolute top-full mt-1 ${compact ? 'right-0 w-64' : 'left-0 w-80'} bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl z-20 overflow-hidden`}>
++        <div className="p-2">
++          {!compact && (
++            <p className="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
++              Доступные треки
++            </p>
++          )}
++          {courses.map(course => (
++            <button
++              key={course.id}
++              onClick={() => {
++                onSelectCourse(course.id);
++                setDropdownOpen(false);
++              }}
++              className={`
++                w-full flex items-start gap-3 p-3 rounded-xl text-left transition-colors
++                ${course.id === currentCourseId
++                  ? 'bg-gradient-to-r from-[#0593C6]/10 to-[#D83996]/10 dark:from-[#0593C6]/20 dark:to-[#D83996]/20 border border-[#0593C6]/30 dark:border-[#D83996]/30'
++                  : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
++                }
++              `}
++            >
++              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
++                {getCourseIcon(course.icon)}
++              </div>
++              <div className="flex-1 min-w-0">
++                <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
++                  {compact ? course.title.split(':')[0] : course.title}
++                </p>
++                {!compact && (
++                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
++                    {course.description}
++                  </p>
++                )}
++              </div>
++            </button>
++          ))}
++        </div>
++      </div>
++    </>
++  );
++
+   return (
+     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+@@ -63,78 +115,40 @@ export default function Header({
+             </button>
+           </div>
+ 
+-          {/* Course selector + progress */}
+-          <div className="hidden sm:flex items-center gap-4 flex-1 max-w-md mx-4">
+-            {/* Course dropdown */}
+-            <div className="relative">
+-              <button
+-                onClick={() => setDropdownOpen(!dropdownOpen)}
+-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors min-w-0 max-w-[220px]"
+-              >
+-                {getCourseIcon(currentCourse.icon)}
+-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+-                  {currentCourse.title.split(':')[0]}
+-                </span>
+-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+-              </button>
++          {/* Course selector + progress — только внутри урока */}
++          {showTrackSwitcher && (
++            <div className="hidden sm:flex items-center gap-4 flex-1 max-w-md mx-4">
++              {/* Course dropdown */}
++              <div className="relative">
++                <button
++                  onClick={() => setDropdownOpen(!dropdownOpen)}
++                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors min-w-0 max-w-[220px]"
++                >
++                  {getCourseIcon(currentCourse.icon)}
++                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
++                    {currentCourse.title.split(':')[0]}
++                  </span>
++                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
++                </button>
+ 
+-              {/* Dropdown menu */}
+-              {dropdownOpen && (
+-                <>
+-                  <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
+-                  <div className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl z-20 overflow-hidden">
+-                    <div className="p-2">
+-                      <p className="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+-                        Доступные треки
+-                      </p>
+-                      {courses.map(course => (
+-                        <button
+-                          key={course.id}
+-                          onClick={() => {
+-                            onSelectCourse(course.id);
+-                            setDropdownOpen(false);
+-                          }}
+-                          className={`
+-                            w-full flex items-start gap-3 p-3 rounded-xl text-left transition-colors
+-                            ${course.id === currentCourseId
+-                              ? 'bg-gradient-to-r from-[#0593C6]/10 to-[#D83996]/10 dark:from-[#0593C6]/20 dark:to-[#D83996]/20 border border-[#0593C6]/30 dark:border-[#D83996]/30'
+-                              : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
+-                            }
+-                          `}
+-                        >
+-                          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
+-                            {getCourseIcon(course.icon)}
+-                          </div>
+-                          <div className="flex-1 min-w-0">
+-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
+-                              {course.title}
+-                            </p>
+-                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
+-                              {course.description}
+-                            </p>
+-                          </div>
+-                        </button>
+-                      ))}
+-                    </div>
+-                  </div>
+-                </>
+-              )}
+-            </div>
++                {dropdownOpen && renderDropdownMenu(false)}
++              </div>
+ 
+-            {/* Progress bar */}
+-            <div className="flex-1 min-w-[100px]">
+-              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+-                <div
+-                  className="h-full bg-gradient-to-r from-[#0593C6] to-[#D83996] rounded-full transition-all duration-500 ease-out"
+-                  style={{ width: `${progress}%` }}
+-                />
++              {/* Progress bar */}
++              <div className="flex-1 min-w-[100px]">
++                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
++                  <div
++                    className="h-full bg-gradient-to-r from-[#0593C6] to-[#D83996] rounded-full transition-all duration-500 ease-out"
++                    style={{ width: `${progress}%` }}
++                  />
++                </div>
++                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{Math.round(progress)}% пройдено</p>
+               </div>
+-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{Math.round(progress)}% пройдено</p>
+             </div>
+-          </div>
++          )}
+ 
+           {/* Score & Dark mode */}
+-          <div className="flex items-center gap-3">
++          <div className="flex items-center gap-3 ml-auto">
+             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 rounded-full border border-amber-200 dark:border-amber-700/50">
+               <Trophy className="w-4 h-4 text-amber-500" />
+               <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">{score}</span>
+@@ -153,57 +167,30 @@ export default function Header({
+           </div>
+         </div>
+ 
+-        {/* Mobile progress + course selector */}
+-        <div className="sm:hidden mt-2 flex items-center gap-3">
+-          <div className="flex-1">
+-            <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+-              <div
+-                className="h-full bg-gradient-to-r from-[#0593C6] to-[#D83996] rounded-full transition-all duration-500 ease-out"
+-                style={{ width: `${progress}%` }}
+-              />
++        {/* Mobile progress + course selector — тоже только внутри урока */}
++        {showTrackSwitcher && (
++          <div className="sm:hidden mt-2 flex items-center gap-3">
++            <div className="flex-1">
++              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
++                <div
++                  className="h-full bg-gradient-to-r from-[#0593C6] to-[#D83996] rounded-full transition-all duration-500 ease-out"
++                  style={{ width: `${progress}%` }}
++                />
++              </div>
++              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{Math.round(progress)}% пройдено</p>
++            </div>
++            <div className="relative">
++              <button
++                onClick={() => setDropdownOpen(!dropdownOpen)}
++                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200"
++              >
++                {getCourseIcon(currentCourse.icon)}
++                <ChevronDown className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
++              </button>
++              {dropdownOpen && renderDropdownMenu(true)}
+             </div>
+-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{Math.round(progress)}% пройдено</p>
+-          </div>
+-          <div className="relative">
+-            <button
+-              onClick={() => setDropdownOpen(!dropdownOpen)}
+-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200"
+-            >
+-              {getCourseIcon(currentCourse.icon)}
+-              <ChevronDown className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+-            </button>
+-            {dropdownOpen && (
+-              <>
+-                <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
+-                <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl z-20 overflow-hidden">
+-                  <div className="p-2">
+-                    {courses.map(course => (
+-                      <button
+-                        key={course.id}
+-                        onClick={() => {
+-                          onSelectCourse(course.id);
+-                          setDropdownOpen(false);
+-                        }}
+-                        className={`
+-                          w-full flex items-center gap-2 p-2.5 rounded-xl text-left transition-colors
+-                          ${course.id === currentCourseId
+-                            ? 'bg-gradient-to-r from-[#0593C6]/10 to-[#D83996]/10 dark:from-[#0593C6]/20 dark:to-[#D83996]/20'
+-                            : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
+-                          }
+-                        `}
+-                      >
+-                        {getCourseIcon(course.icon)}
+-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
+-                          {course.title.split(':')[0]}
+-                        </span>
+-                      </button>
+-                    ))}
+-                  </div>
+-                </div>
+-              </>
+-            )}
+           </div>
+-        </div>
++        )}
+       </div>
+     </header>
+   );
+diff --git a/src/components/StepViewer.tsx b/src/components/StepViewer.tsx
+index 89fbc9c..fd70765 100644
+--- a/src/components/StepViewer.tsx
++++ b/src/components/StepViewer.tsx
+@@ -63,7 +63,10 @@ export default function StepViewer({
+           <QuizStepComponent
+             step={step}
+             selectedAnswer={quizAnswers[step.id]}
++            isCompleted={isCompleted}
+             onAnswer={onQuizAnswer}
++            onComplete={onComplete}
++            onNext={handleNext}
+           />
+         );
+       case 'FLASHCARD':
+diff --git a/src/components/steps/QuizStep.tsx b/src/components/steps/QuizStep.tsx
+index eaf9bc6..6afb561 100644
+--- a/src/components/steps/QuizStep.tsx
++++ b/src/components/steps/QuizStep.tsx
+@@ -1,23 +1,42 @@
+ import { useState } from 'react';
+-import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
++import { CheckCircle, XCircle, HelpCircle, ClipboardCheck, RotateCcw } from 'lucide-react';
+ import { QuizStep as QuizStepType } from '../../types/course';
+ 
+ interface Props {
+   step: QuizStepType;
+   selectedAnswer: number | undefined;
++  isCompleted?: boolean;
+   onAnswer: (stepId: string, answerIndex: number) => void;
++  /** Сохранение прогресса шага (onComplete -> запись в localStorage в App) */
++  onComplete: () => void;
++  /** Переход к следующему шагу */
++  onNext?: () => void;
+ }
+ 
+-export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
+-  const [showResult, setShowResult] = useState(selectedAnswer !== undefined);
++export default function QuizStep({ step, selectedAnswer, isCompleted, onAnswer, onComplete, onNext }: Props) {
++  const hasAnswered = selectedAnswer !== undefined;
++  // Режим результатов показываем только после того, как пользователь нажал «Завершить тест»
++  const [submitted, setSubmitted] = useState<boolean>(Boolean(isCompleted) && hasAnswered);
++
++  const isCorrect = selectedAnswer === step.correctAnswer;
++  const scorePercent = hasAnswered ? (isCorrect ? 100 : 0) : 0;
+ 
+   const handleSelect = (index: number) => {
+-    if (showResult) return;
++    if (submitted) return;
+     onAnswer(step.id, index);
+-    setShowResult(true);
+   };
+ 
+-  const isCorrect = selectedAnswer === step.correctAnswer;
++  // Обработчик кнопки «Завершить тест»: без async-ловушек и preventDefault —
++  // синхронно считает результат, сохраняет прогресс и включает экран разбора.
++  const handleSubmit = () => {
++    if (!hasAnswered || submitted) return;
++    setSubmitted(true);
++    onComplete(); // completedSteps / score -> localStorage
++  };
++
++  const handleRetry = () => {
++    setSubmitted(false);
++  };
+ 
+   return (
+     <div className="space-y-6 animate-in fade-in duration-300">
+@@ -49,42 +68,48 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
+ 
+           let optionStyle = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20';
+ 
+-          if (showResult && isSelected) {
++          if (submitted && isSelected) {
+             optionStyle = isCorrectOption
+               ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-700'
+               : 'bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-500 ring-2 ring-red-200 dark:ring-red-700';
+-          } else if (showResult && isCorrectOption) {
++          } else if (submitted && isCorrectOption) {
+             optionStyle = 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-600';
++          } else if (isSelected) {
++            // Выбранный, но ещё не отправленный вариант — подсветка перед проверкой
++            optionStyle = 'bg-[#0593C6]/5 dark:bg-[#0593C6]/15 border-[#0593C6] dark:border-[#3BA8D8] ring-2 ring-[#0593C6]/20 dark:ring-[#3BA8D8]/25';
+           }
+ 
+           return (
+             <button
+               key={index}
++              type="button"
+               onClick={() => handleSelect(index)}
+-              disabled={showResult}
++              disabled={submitted}
+               className={`
+                 w-full flex items-start gap-3 p-4 rounded-2xl border-2
+                 text-left transition-all duration-200
+                 ${optionStyle}
+-                ${!showResult ? 'cursor-pointer' : 'cursor-default'}
++                ${!submitted ? 'cursor-pointer active:scale-[0.99]' : 'cursor-default'}
+               `}
+             >
+               {/* Option indicator */}
+               <div className={`
+                 w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0
+-                ${showResult && isSelected && isCorrectOption
++                ${submitted && isSelected && isCorrectOption
+                   ? 'bg-emerald-500 border-emerald-500 text-white'
+-                  : showResult && isSelected && !isCorrectOption
++                  : submitted && isSelected && !isCorrectOption
+                     ? 'bg-red-500 border-red-500 text-white'
+-                    : showResult && isCorrectOption
++                    : submitted && isCorrectOption
+                       ? 'border-emerald-400 dark:border-emerald-500'
+-                      : 'border-slate-300 dark:border-slate-600'
++                      : isSelected
++                        ? 'border-[#0593C6] bg-[#0593C6] text-white'
++                        : 'border-slate-300 dark:border-slate-600'
+                 }
+               `}>
+-                {showResult && isSelected && isCorrectOption && <CheckCircle className="w-4 h-4" />}
+-                {showResult && isSelected && !isCorrectOption && <XCircle className="w-4 h-4" />}
+-                {!showResult && (
+-                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
++                {submitted && isSelected && isCorrectOption && <CheckCircle className="w-4 h-4" />}
++                {submitted && isSelected && !isCorrectOption && <XCircle className="w-4 h-4" />}
++                {!submitted && (
++                  <span className={`text-xs font-bold ${isSelected ? '' : 'text-slate-400 dark:text-slate-500'}`}>
+                     {String.fromCharCode(65 + index)}
+                   </span>
+                 )}
+@@ -92,9 +117,9 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
+ 
+               {/* Option text */}
+               <span className={`text-sm leading-relaxed pt-0.5 ${
+-                showResult && isSelected && !isCorrectOption
++                submitted && isSelected && !isCorrectOption
+                   ? 'text-red-700 dark:text-red-300'
+-                  : showResult && (isSelected || isCorrectOption)
++                  : submitted && (isSelected || isCorrectOption)
+                     ? 'text-emerald-700 dark:text-emerald-300'
+                     : 'text-slate-700 dark:text-slate-200'
+               }`}>
+@@ -105,8 +130,35 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
+         })}
+       </div>
+ 
+-      {/* Result & Explanation */}
+-      {showResult && (
++      {/* Submit zone — кнопка активна, если выбран хотя бы один вариант */}
++      {!submitted && (
++        <div className="pt-1">
++          <button
++            type="button"
++            onClick={handleSubmit}
++            disabled={!hasAnswered}
++            title={hasAnswered ? 'Подсчитать результат и открыть разбор' : 'Сначала выберите один вариант ответа'}
++            className={`
++              w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl
++              font-semibold text-sm transition-all duration-200
++              ${hasAnswered
++                ? 'bg-gradient-to-r from-[#0593C6] to-[#D83996] text-white shadow-md hover:shadow-lg hover:brightness-105 active:scale-[0.99] cursor-pointer'
++                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'}
++            `}
++          >
++            <ClipboardCheck className="w-5 h-5" />
++            Завершить тест
++          </button>
++          {!hasAnswered && (
++            <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
++              Выберите вариант ответа выше, чтобы кнопка стала активной
++            </p>
++          )}
++        </div>
++      )}
++
++      {/* Экран результатов: баллы, разбор ошибок, переход к следующему шагу */}
++      {submitted && (
+         <div className={`
+           p-4 rounded-2xl border-l-4 animate-in slide-in-from-bottom-2 duration-300
+           ${isCorrect
+@@ -114,19 +166,31 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
+             : 'bg-red-50/80 dark:bg-red-900/20 border-red-400'
+           }
+         `}>
+-          <div className="flex items-center gap-2 mb-2">
+-            {isCorrect ? (
+-              <>
+-                <CheckCircle className="w-5 h-5 text-emerald-500" />
+-                <span className="font-semibold text-emerald-700 dark:text-emerald-300">Верно! 🎉</span>
+-              </>
+-            ) : (
+-              <>
+-                <XCircle className="w-5 h-5 text-red-500" />
+-                <span className="font-semibold text-red-700 dark:text-red-300">Неверно</span>
+-              </>
+-            )}
++          <div className="flex items-center justify-between gap-2 mb-2">
++            <div className="flex items-center gap-2">
++              {isCorrect ? (
++                <>
++                  <CheckCircle className="w-5 h-5 text-emerald-500" />
++                  <span className="font-semibold text-emerald-700 dark:text-emerald-300">Верно! 🎉</span>
++                </>
++              ) : (
++                <>
++                  <XCircle className="w-5 h-5 text-red-500" />
++                  <span className="font-semibold text-red-700 dark:text-red-300">Неверно</span>
++                </>
++              )}
++            </div>
++            {/* Баллы за шаг */}
++            <span className={`
++              px-2.5 py-1 rounded-full text-xs font-bold
++              ${isCorrect
++                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
++                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'}
++            `}>
++              {scorePercent}% · {isCorrect ? '+10' : '+0'} баллов
++            </span>
+           </div>
++
+           <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+             {step.explanation}
+           </p>
+@@ -142,6 +206,35 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
+               </p>
+             </div>
+           )}
++
++          {/* Действия: следующий шаг / пересдача */}
++          <div className="mt-4 flex items-center gap-2">
++            {onNext && (
++              <button
++                type="button"
++                onClick={onNext}
++                className={`
++                  flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
++                  font-semibold text-sm text-white transition-all duration-200
++                  ${isCorrect
++                    ? 'bg-emerald-500 hover:bg-emerald-600'
++                    : 'bg-gradient-to-r from-[#0593C6] to-[#D83996] hover:brightness-105'}
++                `}
++              >
++                {isCorrect ? 'Ответ засчитан — следующий шаг' : 'Перейти к следующему шагу'}
++              </button>
++            )}
++            <button
++              type="button"
++              onClick={handleRetry}
++              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium
++                bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
++                text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
++            >
++              <RotateCcw className="w-4 h-4" />
++              Пересдать
++            </button>
++          </div>
+         </div>
+       )}
+     </div>
+-- 
+2.39.5
+
+
+From 989bf679d4c6b9dc6294bc2006899ef27d768412 Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Tue, 3 Nov 2026 19:36:58 +0000
+Subject: [PATCH 2/3] Clarify strict showTrackSwitcher condition in Header
+
+---
+ src/components/Header.tsx | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/components/Header.tsx b/src/components/Header.tsx
+index 27f91ff..91414b4 100644
+--- a/src/components/Header.tsx
++++ b/src/components/Header.tsx
+@@ -51,6 +51,7 @@ export default function Header({
+ 
+   // Переключатель трека/урока нужен ТОЛЬКО внутри урока.
+   // На главной (dashboard) он дублирует большие карточки курсов — скрываем.
++  // Строгое условие: true только при явном currentView === 'lesson'.
+   const showTrackSwitcher = currentView === 'lesson';
+ 
+   const renderDropdownMenu = (compact: boolean) => (
+-- 
+2.39.5
+
+
+From 5da9112bb9c2a9fd63c16a38c93d2973ae3e77ba Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Tue, 3 Nov 2026 19:41:13 +0000
+Subject: [PATCH 3/3] Add Block IX: comparative genomics, Peto's paradox and
+ onc resistance (Track III mod 16)
+
+---
+ src/data/coursesData.ts | 159 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 159 insertions(+)
+
+diff --git a/src/data/coursesData.ts b/src/data/coursesData.ts
+index 8e08eae..ca30c01 100644
+--- a/src/data/coursesData.ts
++++ b/src/data/coursesData.ts
+@@ -2107,6 +2107,165 @@ export const COURSES_DATA: Course[] = [
+     description: '60 млн лет эволюции отряда Proboscidea, филогенетический ряд мамонтов, островная карликовость и современные протоколы CITES/MIKE.',
+     icon: 'Globe',
+     modules: [
++      {
++        id: 'mod-3-16-cancer-resistance-peto',
++        title: 'Модуль 16: Сравнительная геномика, парадокс Пето и онкорезистентность Elephantidae',
++        lessons: [
++          {
++            id: 'lesson-3-16-1',
++            title: 'Урок 16.1: Парадокс Пето, мультипликация TP53 и ретроген LIF6',
++            steps: [
++              {
++                id: 'step-3-16-1-1',
++                type: 'THEORY',
++                title: '1. Разрешение парадокса Пето и молекулярная геномика онкопротекции',
++                content: `
++### Теоретический базис парадокса Пето
++Согласно многостадийным кинетическим моделям онкогенеза (Peto, 1977), вероятность возникновения неопластической трансформации клетки вычисляется по формуле:
++
++**P(cancer) = 1 − exp(−λ·N·t^k)**
++
++где *N* — общее число соматических клеток, *λ* — скорость соматического мутагенеза, *t* — возраст, *k* — число необходимых драйверных мутаций.
++
++* **Масштаб соматической массы:** При массе 4–6 тонн организм слона содержит ~1×10¹⁴–1×10¹⁵ соматических клеток, что на **2 порядка больше**, чем у человека (1×10¹³).
++* **Онкологическая статистика:** На основе аудита патологоанатомических вскрытий смертность от неоплазий у слонов составляет всего **< 4.8%** (против 20–25% у человека). Данный феномен описывает **парадокс Пето**.
++
++\`\`\`
++Клеточная масса слона (>10¹⁴ клеток) ──► Теоретический онкориск > 90%
++                                                   │
++                                                   ▼
++20 копий TP53 + Ретроген LIF6 ──► Фактическая смертность < 4.8% (Парадокс Пето)
++\`\`\`
++
++| Молекулярный параметр | Elephantidae | Homo sapiens | Эволюционный эффект |
++| :--- | :--- | :--- | :--- |
++| **Число соматических клеток** | **10¹⁴–10¹⁵** | **10¹³** | Нагрузка на ДНК-репарацию выше на 2 порядка. |
++| **Смертность от онкопатологий** | **< 4.8%** | **20–25%** | Разрешение парадокса Пето. |
++| **Копии гена TP53 (аллели)** | **20 копий (40 аллелей)** | **1 копия (2 аллеля)** | 1 канонический ген + 19 ретрогенов *TP53RT*. |
++| **Ретроген LIF6 («зомби-ген»)** | **Активен (7–11 копий)** | **Отсутствует (1 канонический LIF)** | Митохондриальный апоптоз поврежденных клеток. |
++                `
++              },
++              {
++                id: 'step-3-16-1-2',
++                type: 'THEORY',
++                title: '2. Архитектура 20 копий TP53 и ретрогены TP53RT',
++                content: `
++### Геномная структура дупликаций гена TP53
++В диплоидном геноме слонов содержится **20 копий гена TP53 (40 аллелей)**:
++1. **1 канонический ген *TP53*:** Содержит классическую интрон-экзонную структуру с нормальным промотором.
++2. **19 процессированных ретрогенов (*TP53RT*):** Возникли в результате обратной транскрипции мРНК p53 и встраивания в геном без интронов.
++
++\`\`\`
++Генотоксический стресс (DSB разрывы ДНК) ──► Накопление белка p53 в ядре
++                                                           │
++                                                           ▼
++   Связывание MDM2 ретрогенами p53RT ──► Стабилизация канонического p53
++                                                           │
++                                                           ▼
++Сверхчувствительный апоптоз лимфоцитов (потери 85% клеток при 2 Гр за 48 ч)
++\`\`\`
++
++#### Механизм действия белков p53RT:
++* **Защита от MDM2-деградации:** Белки *TP53RT* конкурентно связывают E3-убиквитинлигазу MDM2, не позволяя ей разрушать канонический белок p53.
++* **Гиперчувствительный DDR-ответ:** При появлении двунитевых разрывов ДНК (DSBs) и маркировании их фосфорилированным гистоном γ-H2AX, лимфоциты слонов запускают апоптоз в **2.4 раза быстрее**, чем клетки человека. При облучении дозой 2 Гр через 48 часов погибает **85% лимфоцитов слона** (принцип «лучше умереть, чем мутировать»).
++                `
++              },
++              {
++                id: 'step-3-16-1-3',
++                type: 'THEORY',
++                title: '3. «Зомби-ген» LIF6 и эволюция AEM-генов митохондрий',
++                content: `
++### Молекулярный киллер LIF6 и геномика AEM
++Если *TP53* является сенсором повреждений, то главным исполнительным инструментом апоптоза выступает ретроген **LIF6**.
++
++\`\`\`
++Активация p53 ──► Транскрипция ретрогена LIF6 ──► Миграция LIF6 в митохондрии
++                                                              │
++                                                              ▼
++Олигомеризация BAX/BAK ──► Проницаемость мембраны MOMP ──► Лизис клетки (2–4 ч)
++\`\`\`
++
++1. **Реанимация псевдогена (*LIF6*):** Около 30 млн лет назад неактивный ретроген фактора ингибирования лейкоза приобрел промотор с 3 сайтами связывания p53 и гидрофобный сигнал митохондриальной адресации.
++2. **Индукция MOMP:** Белок LIF6 мигрирует к наружной мембране митохондрий, активирует поры BAX/BAK и вызывает проницаемость мембраны (*MOMP — Mitochondrial Outer Membrane Permeabilization*), что влечет выход цитохрома c и гибель клетки за **2–4 часа**.
++3. **Геномика аэробного метаболизма (AEM):** У слонов зафиксирована ускоренная адаптивная эволюция (dN/dS > 1) 15 ядерных генов аэробного энергетического метаболизма митохондрий (AEM), что снижает выработку активных форм кислорода (АФК / ROS) и защищает нейроны-долгожители головного мозга.
++
++[CLINICAL GUIDANCE]
++**Онкодиагностический регламент у Elephantidae:**
++При обнаружении любых узловых новообразований у слонов в неволе следует учитывать высокий апоптотический потенциал их тканей. Биопсия тканей проводится тонкоигольным методом под УЗИ-контролем с обязательным иммуногистохимическим анализом экспрессии p53 и маркеров γ-H2AX для дифференциации доброкачественной гиперплазии от атипичной неоплазии.
++                `
++              },
++              {
++                id: 'step-3-16-1-4',
++                type: 'QUIZ',
++                title: 'Проверка знаний: Молекулярные механизмы парадокса Пето',
++                question: 'Какую роль выполняют 19 процессированных ретрогенов TP53RT в геноме слонов при ответе на повреждения ДНК?',
++                options: [
++                  'Конкурентно связывают лигазу MDM2, предотвращая деградацию канонического белка p53 и поддерживая его высокий уровень в ядре',
++                  'Блокируют транскрипцию гена LIF6, предотвращая гибель здоровых клеток',
++                  'Ускоряют репарацию ДНК путем прямого сшивания двунитевых разрывов',
++                  'Ингибируют работу гистонов γ-H2AX, снижая чувствительность к радиации'
++                ],
++                correctAnswer: 0,
++                explanation: 'Белки TP53RT связывают E3-убиквитинлигазу MDM2, экранируя канонический p53 от деградации и обеспечивая мгновенный запуск апоптоза.',
++                wrongExplanation: [
++                  'Неверно! Ретрогены TP53RT, наоборот, стимулируют экспрессию LIF6 через подъем уровня свободного p53.',
++                  'Неверно! Белки p53/TP53RT направляют клетку на апоптоз, а не на затяжную репарацию.',
++                  'Неверно! γ-H2AX является маркером разрывов ДНК, и его аккумуляция у слонов проходит сверхчувствительно.'
++                ]
++              },
++              {
++                id: 'step-3-16-1-5',
++                type: 'FLASHCARD',
++                title: 'Термины сравнительной геномики и онкорезистентности',
++                cards: [
++                  {
++                    term: 'Парадокс Пето',
++                    definition: 'Отсутствие прямой корреляции между соматической массой и риском рака: у слонов с 10¹⁴ клеток смертность от онкологии составляет <4.8%.'
++                  },
++                  {
++                    term: 'TP53RT',
++                    definition: '19 процессированных ретрогенов p53 в геноме слонов, нейтрализующих лигазу MDM2 и защищающих канонический p53 от деградации.'
++                  },
++                  {
++                    term: 'Ретроген LIF6',
++                    definition: '«Зомби-ген», активируемый белком p53 и вызывающий митохондриальную проницаемость MOMP и мгновенный лизис поврежденных клеток.'
++                  },
++                  {
++                    term: 'AEM-гены',
++                    definition: 'Гены аэробного метаболизма митохондрий с dN/dS > 1, оптимизирующие синтез АТФ и минимизирующие окислительный стресс АФК.'
++                  }
++                ]
++              },
++              {
++                id: 'step-3-16-1-6',
++                type: 'SCENARIO',
++                title: 'Клинический симулятор: Оценка генотоксического ответа и биопсия',
++                patientInfo: {
++                  name: 'Азиатский слон (38 лет, масса 4.5 тонны)',
++                  age: 38,
++                  role: 'Подозрение на неоплазию кожи в области височной ямки',
++                  avatarEmoji: '🐘'
++                },
++                situation: 'У слона выявлено быстрорастущее узловое образование (6 см) кожи за височной железой. Младший ветеринар предлагает провести травматичную хирургическую резекцию с затяжной репарацией. Лабораторная проба крови показала высокое фосфорилирование γ-H2AX и гиперапоптоз лимфоцитов. Каково правильное решение?',
++                options: [
++                  {
++                    id: 'opt-1',
++                    text: 'Провести немедленную радикальную широкую резекцию без тонкоигольной биопсии и гистологии',
++                    isCorrect: false,
++                    feedback: 'Ошибка! Хирургическая травма без биопсии опасна, так как из-за гиперапоптотического профиля слонов узлы часто являются реактивной воспалительной гиперплазией.'
++                  },
++                  {
++                    id: 'opt-2',
++                    text: 'Выполнить тонкоигольную пункционную биопсию (ТАБ) под УЗИ-контролем с ИГХ-анализом на p53 и γ-H2AX для подтверждения воспалительной гиперергии',
++                    isCorrect: true,
++                    feedback: 'Клинически верно! Высокий уровень γ-H2AX и p53-опосредованного апоптоза часто отражает интенсивный локальный иммунный ответ, дифференцируемый гистологией.'
++                  }
++                ]
++              }
++            ]
++          }
++        ]
++      },
+       {
+         id: 'mod-4-1-phylogeny',
+         title: 'Модуль 1: Эволюция и филогенез Proboscidea',
+-- 
+2.39.5
+
