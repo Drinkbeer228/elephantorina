@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/* Новая цветовая схема */
+:root {
+  --sky-blue: #0593C6;
+  --pure-white: #FCFFFF;
+  --hot-pink: #D83996;
+  --sky-blue-light: #3BA8D8;
+  --hot-pink-light: #E565AE;
+  --sky-blue-dark: #0474A0;
+  --hot-pink-dark: #B82F7E;
+}
+
+/* Custom theme for Tailwind v4 */
+@theme {
+  --color-sky-brand: #0593C6;
+  --color-pink-brand: #D83996;
+  --color-pure-white: #FCFFFF;
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Пример фонового градиента */
+.background-gradient {
+  background: linear-gradient(135deg, #0593C6 0%, #D83996 100%);
+}
+
+.background-gradient-soft {
+  background: linear-gradient(135deg, rgba(5, 147, 198, 0.08) 0%, rgba(216, 57, 150, 0.08) 100%);
+}
+
+.background-gradient-vivid {
+  background: linear-gradient(135deg, #0593C6 0%, #7C5CE0 50%, #D83996 100%);
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+/* 3D Card flip support */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.slide-in-from-bottom-2 {
+  animation: slideInFromBottom 0.3s ease-out forwards;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Glass morphism utilities */
+.glass {
+  background: rgba(252, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(5, 147, 198, 0.15);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(216, 57, 150, 0.2);
+}
+
+/* Brand gradient text */
+.text-gradient-brand {
+  background: linear-gradient(135deg, #0593C6 0%, #D83996 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Brand gradient button */
+.btn-gradient-brand {
+  background: linear-gradient(135deg, #0593C6 0%, #D83996 100%);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient-brand:hover {
+  background: linear-gradient(135deg, #0474A0 0%, #B82F7E 100%);
+  box-shadow: 0 8px 25px rgba(5, 147, 198, 0.3), 0 4px 12px rgba(216, 57, 150, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Smooth transitions for dark mode */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Focus styles */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #0593C6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
