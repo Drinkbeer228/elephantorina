@@ -3,6 +3,7 @@ import { Step } from '../types/course';
 import TheoryStepComponent from './steps/TheoryStep';
 import QuizStepComponent from './steps/QuizStep';
 import FlashcardStepComponent from './steps/FlashcardStep';
+import ScenarioStepComponent from './steps/ScenarioStep';
 
 interface Props {
   step: Step;
@@ -11,9 +12,11 @@ interface Props {
   completedSteps: string[];
   bookmarks: string[];
   quizAnswers: Record<string, number>;
+  scenarioAnswers: Record<string, string>;
   onNavigate: (stepId: string) => void;
   onComplete: () => void;
   onQuizAnswer: (stepId: string, answerIndex: number) => void;
+  onScenarioAnswer: (stepId: string, optionId: string) => void;
   onToggleBookmark: (stepId: string) => void;
 }
 
@@ -24,9 +27,11 @@ export default function StepViewer({
   completedSteps,
   bookmarks,
   quizAnswers,
+  scenarioAnswers,
   onNavigate,
   onComplete,
   onQuizAnswer,
+  onScenarioAnswer,
   onToggleBookmark
 }: Props) {
   const isFirst = currentIndex === 0;
@@ -63,6 +68,14 @@ export default function StepViewer({
         );
       case 'FLASHCARD':
         return <FlashcardStepComponent step={step} />;
+      case 'SCENARIO':
+        return (
+          <ScenarioStepComponent
+            step={step}
+            selectedOptionId={scenarioAnswers[step.id]}
+            onSelectOption={onScenarioAnswer}
+          />
+        );
       default:
         return <div>Неизвестный тип степа</div>;
     }

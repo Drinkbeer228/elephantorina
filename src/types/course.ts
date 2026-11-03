@@ -35,16 +35,25 @@ export interface FlashcardStep extends BaseStep {
   cards: Flashcard[];
 }
 
-// Сценарный степ
+// Опция клинического сценария
+export interface ScenarioOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+  feedback: string; // Ветеринарное объяснение результатов выбора
+}
+
+// Клинический симулятор
 export interface ScenarioStep extends BaseStep {
   type: 'SCENARIO';
-  scenario: string;
-  choices: {
-    id: string;
-    text: string;
-    consequence: string;
-    isOptimal: boolean;
-  }[];
+  patientInfo: {
+    name: string;
+    age: number;
+    role: string;
+    avatarEmoji?: string;
+  };
+  situation: string; // Описание симптомов / обстановки
+  options: ScenarioOption[];
 }
 
 // Объединённый тип степа
@@ -81,6 +90,7 @@ export interface UserProgress {
   score: number;
   bookmarks: string[];
   quizAnswers: Record<string, number>;
+  scenarioAnswers: Record<string, string>; // stepId -> optionId
   startedAt: string;
   lastActivity: string;
 }

@@ -40,6 +40,7 @@ function createDefaultProgress(courseId: string): UserProgress {
     score: 0,
     bookmarks: [],
     quizAnswers: {},
+    scenarioAnswers: {},
     startedAt: new Date().toISOString(),
     lastActivity: new Date().toISOString()
   };
@@ -146,6 +147,14 @@ export default function App() {
     });
   }, [updateProgress]);
 
+  const handleScenarioAnswer = useCallback((stepId: string, optionId: string) => {
+    updateProgress(prev => ({
+      ...prev,
+      scenarioAnswers: { ...prev.scenarioAnswers, [stepId]: optionId },
+      lastActivity: new Date().toISOString()
+    }));
+  }, [updateProgress]);
+
   const handleSelectCourse = useCallback((courseId: string) => {
     setCurrentCourseId(courseId);
     setSidebarOpen(false);
@@ -205,9 +214,11 @@ export default function App() {
             completedSteps={progress.completedSteps}
             bookmarks={progress.bookmarks}
             quizAnswers={progress.quizAnswers}
+            scenarioAnswers={progress.scenarioAnswers}
             onNavigate={handleSelectStep}
             onComplete={handleCompleteStep}
             onQuizAnswer={handleQuizAnswer}
+            onScenarioAnswer={handleScenarioAnswer}
             onToggleBookmark={handleToggleBookmark}
           />
         </main>
