@@ -97,7 +97,7 @@ export default function Header({
                           className={`
                             w-full flex items-start gap-3 p-3 rounded-xl text-left transition-colors
                             ${course.id === currentCourseId
-                              ? 'bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700'
+                              ? 'bg-gradient-to-r from-[#0593C6]/10 to-[#D83996]/10 dark:from-[#0593C6]/20 dark:to-[#D83996]/20 border border-[#0593C6]/30 dark:border-[#D83996]/30'
                               : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
                             }
                           `}
@@ -125,7 +125,7 @@ export default function Header({
             <div className="flex-1 min-w-[100px]">
               <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
+                  className="h-full bg-gradient-to-r from-[#0593C6] to-[#D83996] rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -158,7 +158,7 @@ export default function Header({
           <div className="flex-1">
             <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-[#0593C6] to-[#D83996] rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -187,7 +187,7 @@ export default function Header({
                         className={`
                           w-full flex items-center gap-2 p-2.5 rounded-xl text-left transition-colors
                           ${course.id === currentCourseId
-                            ? 'bg-indigo-50 dark:bg-indigo-900/30'
+                            ? 'bg-gradient-to-r from-[#0593C6]/10 to-[#D83996]/10 dark:from-[#0593C6]/20 dark:to-[#D83996]/20'
                             : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
                           }
                         `}
