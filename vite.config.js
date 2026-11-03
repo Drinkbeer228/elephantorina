@@ -9,6 +9,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 3000,
     strictPort: true,
+    allowedHosts: true, // <-- РАЗРЕШАЕТ ЛЮБЫЕ ВНЕШНИЕ ТУННЕЛИ
     hmr: {
       port: 3000,
     },
