@@ -9,13 +9,9 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 3000,
     strictPort: true,
-    allowedHosts: [
-      ".lhr.life",     // разрешает любые поддомены localhost.run
-      "localhost",
-      "127.0.0.1",
-    ],
+    allowedHosts: true,
     hmr: {
-      port: 3000,
+      clientPort: 443, // <-- КЛЮЧЕВОЙ ФИКС: говорит браузеру подключаться к WSS через порт 443 туннеля, а не :3000
     },
   },
 });
