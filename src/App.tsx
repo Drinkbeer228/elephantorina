@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Menu } from 'lucide-react';
 import Header from './components/Header';
-import Sidebar from './components/Sidebar';
+import LessonHeader from './components/LessonHeader';
 import StepViewer from './components/StepViewer';
 import Dashboard from './components/Dashboard';
 import { COURSES_DATA } from './data/coursesData';
@@ -66,7 +65,6 @@ export default function App() {
       return false;
     }
   });
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const course = COURSES_DATA.find(c => c.id === currentCourseId) || COURSES_DATA[0];
   
@@ -105,6 +103,33 @@ export default function App() {
   const totalSteps = allSteps.length;
   const completedCount = progress.completedSteps.length;
   const progressPercent = totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0;
+
+  // Находим урок, к которому относится текущий степ (для шапки в стиле Stepik)
+  const currentLesson = course.modules.flatMap(m => m.lessons).find(l =>
+    l.steps.some(s => s.id === currentStep?.id)
+  );
+
+  // Шаги текущего урока — для ленты табов; если урок не найден, показываем все шаги курса
+  const lessonSteps: Step[] = currentLesson?.steps ?? allSteps;
+
+  // Читаемый номер урока из заголовка («Урок 1.2: ...» -> «1.2») либо позиционный
+  const lessonNumber = (() => {
+    if (!currentLesson) return undefined;
+    const match = currentLesson.title.match(/Урок\s+([\d.]+)/i);
+    if (match) return match[1];
+    const lessons = course.modules.flatMap(m => m.lessons);
+    const idx = lessons.findIndex(l => l.id === currentLesson.id);
+    return idx >= 0 ? String(idx + 1) : undefined;
+  })();
+
+  // Название урока без префикса «Урок X.Y:»
+  const lessonTitle = (() => {
+    if (!currentLesson) return course.title;
+    const colonIdx = currentLesson.title.indexOf(':');
+    return colonIdx > -1 && /^урок/i.test(currentLesson.title)
+      ? currentLesson.title.slice(colonIdx + 1).trim()
+      : currentLesson.title;
+  })();
 
   const updateProgress = useCallback((updater: (prev: UserProgress) => UserProgress) => {
     setProgressStore(prev => ({
@@ -162,7 +187,6 @@ export default function App() {
   const handleSelectCourse = useCallback((courseId: string) => {
     setCurrentCourseId(courseId);
     setCurrentView('LESSON');
-    setSidebarOpen(false);
   }, []);
 
   const handleGoToDashboard = useCallback(() => {
@@ -204,61 +228,39 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      {/* Header */}
-      <Header
-        courseTitle={course.title}
-        courseIcon={course.icon}
-        progress={progressPercent}
-        score={progress.score}
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      {/* Шапка урока в стиле нативного iOS-приложения Stepik:
+          Top App Bar + горизонтальная лента шагов */}
+      <LessonHeader
+        lessonTitle={lessonTitle}
+        lessonNumber={lessonNumber}
+        steps={lessonSteps}
+        currentStepId={currentStep.id}
+        completedSteps={progress.completedSteps}
+        onSelectStep={handleSelectStep}
+        onBack={handleGoToDashboard}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(prev => !prev)}
-        courses={COURSES_DATA}
-        currentCourseId={currentCourseId}
-        onSelectCourse={handleSelectCourse}
-        onLogoClick={handleGoToDashboard}
+        score={progress.score}
       />
 
-      {/* Main layout */}
-      <div className="flex h-[calc(100vh - 65px)]">
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="lg:hidden fixed bottom-20 left-4 z-30 p-3 bg-indigo-500 text-white rounded-full shadow-lg hover:bg-indigo-600 transition-colors"
-          aria-label="Открыть меню"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-
-        {/* Sidebar */}
-        <Sidebar
-          course={course}
-          allSteps={allSteps}
-          currentStepId={currentStep.id}
+      {/* Main content — сразу под лентой шагов, без FAB и бокового меню */}
+      <main className="h-[calc(100dvh_-_105px)] overflow-hidden pb-safe mt-2">
+        <StepViewer
+          step={currentStep}
+          steps={allSteps}
+          currentIndex={currentIndex}
           completedSteps={progress.completedSteps}
-          onSelectStep={handleSelectStep}
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
+          bookmarks={progress.bookmarks}
+          quizAnswers={progress.quizAnswers}
+          scenarioAnswers={progress.scenarioAnswers}
+          onNavigate={handleSelectStep}
+          onComplete={handleCompleteStep}
+          onQuizAnswer={handleQuizAnswer}
+          onScenarioAnswer={handleScenarioAnswer}
+          onToggleBookmark={handleToggleBookmark}
         />
-
-        {/* Main content */}
-        <main className="flex-1 overflow-hidden">
-          <StepViewer
-            step={currentStep}
-            steps={allSteps}
-            currentIndex={currentIndex}
-            completedSteps={progress.completedSteps}
-            bookmarks={progress.bookmarks}
-            quizAnswers={progress.quizAnswers}
-            scenarioAnswers={progress.scenarioAnswers}
-            onNavigate={handleSelectStep}
-            onComplete={handleCompleteStep}
-            onQuizAnswer={handleQuizAnswer}
-            onScenarioAnswer={handleScenarioAnswer}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        </main>
-      </div>
+      </main>
     </div>
   );
 }
