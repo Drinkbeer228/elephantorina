@@ -23,6 +23,8 @@ function getCourseIcon(iconName: string) {
       return <span className="text-lg">👥</span>;
     case 'ShieldCross':
       return <span className="text-lg">🛡️</span>;
+    case 'Globe':
+      return <span className="text-lg">🌍</span>;
     case 'Home':
       return <span className="text-lg">🏠</span>;
     default:

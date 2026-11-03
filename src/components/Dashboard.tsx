@@ -15,6 +15,8 @@ function getCourseIcon(iconName: string) {
       return <span className="text-3xl">👥</span>;
     case 'ShieldCross':
       return <Shield className="w-8 h-8" />;
+    case 'Globe':
+      return <span className="text-3xl">🌍</span>;
     default:
       return <BookOpen className="w-8 h-8" />;
   }
@@ -28,6 +30,8 @@ function getCourseGradient(iconName: string) {
       return 'from-teal-500 to-cyan-600';
     case 'ShieldCross':
       return 'from-rose-500 to-pink-600';
+    case 'Globe':
+      return 'from-emerald-500 to-teal-600';
     default:
       return 'from-slate-500 to-slate-600';
   }
