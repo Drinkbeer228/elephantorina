@@ -7,15 +7,15 @@ interface Props {
 }
 
 export default function FlashcardStep({ step }: Props) {
-  const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
-  const toggleCard = (cardId: string) => {
+  const toggleCard = (index: number) => {
     setFlippedCards(prev => {
       const next = new Set(prev);
-      if (next.has(cardId)) {
-        next.delete(cardId);
+      if (next.has(index)) {
+        next.delete(index);
       } else {
-        next.add(cardId);
+        next.add(index);
       }
       return next;
     });
@@ -42,14 +42,14 @@ export default function FlashcardStep({ step }: Props) {
 
       {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {step.cards.map((card) => {
-          const isFlipped = flippedCards.has(card.id);
+        {step.cards.map((card, index) => {
+          const isFlipped = flippedCards.has(index);
 
           return (
             <div
-              key={card.id}
+              key={index}
               className="perspective-1000 cursor-pointer group"
-              onClick={() => toggleCard(card.id)}
+              onClick={() => toggleCard(index)}
             >
               <div
                 className={`
@@ -60,9 +60,9 @@ export default function FlashcardStep({ step }: Props) {
               >
                 {/* Front */}
                 <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-lg p-6 flex flex-col items-center justify-center text-center group-hover:shadow-xl transition-shadow">
-                  <span className="text-4xl mb-4">{card.emoji || '📝'}</span>
+                  <span className="text-4xl mb-4">📝</span>
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                    {card.front}
+                    {card.term}
                   </h3>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
                     Нажмите, чтобы узнать →
@@ -72,7 +72,7 @@ export default function FlashcardStep({ step }: Props) {
                 {/* Back */}
                 <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-3xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/40 dark:to-purple-900/40 border-2 border-indigo-200 dark:border-indigo-700 shadow-lg p-5 flex flex-col items-center justify-center text-center">
                   <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-                    {card.back}
+                    {card.definition}
                   </p>
                   <div className="mt-3 flex items-center gap-1 text-indigo-500">
                     <RotateCcw className="w-3 h-3" />

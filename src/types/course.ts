@@ -2,51 +2,41 @@
 export type StepType = 'THEORY' | 'QUIZ' | 'FLASHCARD' | 'SCENARIO';
 
 // Базовый степ
-export interface Step {
+export interface BaseStep {
   id: string;
-  title: string;
   type: StepType;
-  content: string;
-  order: number;
+  title: string;
 }
 
 // Теоретический степ
-export interface TheoryStep extends Step {
+export interface TheoryStep extends BaseStep {
   type: 'THEORY';
-  sections: {
-    heading: string;
-    text: string;
-    highlights?: string[];
-    clinicalGuidance?: string;
-    facts?: string[];
-  }[];
+  content: string;
+}
+
+// Карточка для флешкарт
+export interface Flashcard {
+  term: string;
+  definition: string;
 }
 
 // Тестовый степ
-export interface QuizStep extends Step {
+export interface QuizStep extends BaseStep {
   type: 'QUIZ';
   question: string;
-  options: {
-    id: string;
-    text: string;
-    isCorrect: boolean;
-  }[];
+  options: string[];
+  correctAnswer: number;
   explanation: string;
 }
 
 // Степ с карточками
-export interface FlashcardStep extends Step {
+export interface FlashcardStep extends BaseStep {
   type: 'FLASHCARD';
-  cards: {
-    id: string;
-    front: string;
-    back: string;
-    emoji?: string;
-  }[];
+  cards: Flashcard[];
 }
 
 // Сценарный степ
-export interface ScenarioStep extends Step {
+export interface ScenarioStep extends BaseStep {
   type: 'SCENARIO';
   scenario: string;
   choices: {
@@ -57,13 +47,21 @@ export interface ScenarioStep extends Step {
   }[];
 }
 
+// Объединённый тип степа
+export type Step = TheoryStep | QuizStep | FlashcardStep | ScenarioStep;
+
+// Урок
+export interface Lesson {
+  id: string;
+  title: string;
+  steps: Step[];
+}
+
 // Модуль курса
 export interface Module {
   id: string;
   title: string;
-  description: string;
-  emoji: string;
-  steps: Step[];
+  lessons: Lesson[];
 }
 
 // Курс
@@ -71,7 +69,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
-  emoji: string;
+  icon: string;
   modules: Module[];
 }
 
@@ -82,7 +80,7 @@ export interface UserProgress {
   currentStepId: string;
   score: number;
   bookmarks: string[];
-  quizAnswers: Record<string, string>;
+  quizAnswers: Record<string, number>;
   startedAt: string;
   lastActivity: string;
 }

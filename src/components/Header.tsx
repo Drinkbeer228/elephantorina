@@ -2,7 +2,7 @@ import { BookOpen, Trophy, Moon, Sun } from 'lucide-react';
 
 interface HeaderProps {
   courseTitle: string;
-  courseEmoji: string;
+  courseIcon: string;
   progress: number;
   score: number;
   darkMode: boolean;
@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export default function Header({
   courseTitle,
-  courseEmoji,
+  courseIcon,
   progress,
   score,
   darkMode,
@@ -35,7 +35,7 @@ export default function Header({
           <div className="hidden sm:flex items-center gap-4 flex-1 max-w-md mx-4">
             <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 min-w-0">
               <BookOpen className="w-4 h-4 shrink-0 text-indigo-500" />
-              <span className="truncate">{courseEmoji} {courseTitle}</span>
+              <span className="truncate">{courseTitle}</span>
             </div>
             <div className="flex-1 min-w-[100px]">
               <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">

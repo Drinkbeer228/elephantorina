@@ -10,10 +10,10 @@ interface Props {
   currentIndex: number;
   completedSteps: string[];
   bookmarks: string[];
-  quizAnswers: Record<string, string>;
+  quizAnswers: Record<string, number>;
   onNavigate: (stepId: string) => void;
   onComplete: () => void;
-  onQuizAnswer: (stepId: string, answerId: string) => void;
+  onQuizAnswer: (stepId: string, answerIndex: number) => void;
   onToggleBookmark: (stepId: string) => void;
 }
 
@@ -52,17 +52,17 @@ export default function StepViewer({
   const renderStep = () => {
     switch (step.type) {
       case 'THEORY':
-        return <TheoryStepComponent step={step as any} />;
+        return <TheoryStepComponent step={step} />;
       case 'QUIZ':
         return (
           <QuizStepComponent
-            step={step as any}
+            step={step}
             selectedAnswer={quizAnswers[step.id]}
             onAnswer={onQuizAnswer}
           />
         );
       case 'FLASHCARD':
-        return <FlashcardStepComponent step={step as any} />;
+        return <FlashcardStepComponent step={step} />;
       default:
         return <div>Неизвестный тип степа</div>;
     }
@@ -134,9 +134,7 @@ export default function StepViewer({
               transition-all duration-200 shadow-sm
               ${isLast && isCompleted
                 ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                : isCompleted
-                  ? 'bg-indigo-500 hover:bg-indigo-600 text-white'
-                  : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                : 'bg-indigo-500 hover:bg-indigo-600 text-white'
               }
             `}
           >

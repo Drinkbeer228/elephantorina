@@ -3,8 +3,8 @@ import { Menu } from 'lucide-react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import StepViewer from './components/StepViewer';
-import { coursesData } from './data/coursesData';
-import { UserProgress } from './types/course';
+import { COURSES_DATA } from './data/coursesData';
+import { UserProgress, Step } from './types/course';
 
 const STORAGE_KEY = 'elephantology-edu-progress';
 
@@ -17,11 +17,10 @@ function loadProgress(): UserProgress {
   } catch (e) {
     console.error('Failed to load progress:', e);
   }
-  // Default progress
   return {
-    courseId: 'anatomy-giants',
+    courseId: 'track-1-anatomy',
     completedSteps: [],
-    currentStepId: 'step-1',
+    currentStepId: 'step-1-1-1',
     score: 0,
     bookmarks: [],
     quizAnswers: {},
@@ -39,9 +38,13 @@ function saveProgress(progress: UserProgress) {
 }
 
 export default function App() {
-  const course = coursesData[0];
-  const allSteps = course.modules.flatMap(m => m.steps);
+  const course = COURSES_DATA[0];
   
+  // Собираем все степы из всех модулей и уроков в плоский массив
+  const allSteps: Step[] = course.modules.flatMap(m => 
+    m.lessons.flatMap(l => l.steps)
+  );
+
   const [progress, setProgress] = useState<UserProgress>(loadProgress);
   const [darkMode, setDarkMode] = useState(() => {
     try {
@@ -93,10 +96,10 @@ export default function App() {
     });
   }, [currentStep.id]);
 
-  const handleQuizAnswer = useCallback((stepId: string, answerId: string) => {
+  const handleQuizAnswer = useCallback((stepId: string, answerIndex: number) => {
     setProgress(prev => ({
       ...prev,
-      quizAnswers: { ...prev.quizAnswers, [stepId]: answerId },
+      quizAnswers: { ...prev.quizAnswers, [stepId]: answerIndex },
       lastActivity: new Date().toISOString()
     }));
   }, []);
@@ -115,7 +118,7 @@ export default function App() {
       {/* Header */}
       <Header
         courseTitle={course.title}
-        courseEmoji={course.emoji}
+        courseIcon={course.icon}
         progress={progressPercent}
         score={progress.score}
         darkMode={darkMode}
@@ -135,7 +138,8 @@ export default function App() {
 
         {/* Sidebar */}
         <Sidebar
-          steps={allSteps}
+          course={course}
+          allSteps={allSteps}
           currentStepId={currentStep.id}
           completedSteps={progress.completedSteps}
           onSelectStep={handleSelectStep}

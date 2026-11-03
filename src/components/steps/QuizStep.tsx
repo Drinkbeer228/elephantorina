@@ -4,21 +4,20 @@ import { QuizStep as QuizStepType } from '../../types/course';
 
 interface Props {
   step: QuizStepType;
-  selectedAnswer: string | undefined;
-  onAnswer: (stepId: string, answerId: string) => void;
+  selectedAnswer: number | undefined;
+  onAnswer: (stepId: string, answerIndex: number) => void;
 }
 
 export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
-  const [showResult, setShowResult] = useState(!!selectedAnswer);
+  const [showResult, setShowResult] = useState(selectedAnswer !== undefined);
 
-  const handleSelect = (optionId: string) => {
+  const handleSelect = (index: number) => {
     if (showResult) return;
-    onAnswer(step.id, optionId);
+    onAnswer(step.id, index);
     setShowResult(true);
   };
 
-  const selectedOption = step.options.find(o => o.id === selectedAnswer);
-  const hasCorrectAnswer = step.options.some(o => o.isCorrect && o.id === selectedAnswer);
+  const isCorrect = selectedAnswer === step.correctAnswer;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -40,19 +39,16 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
         <p className="text-lg font-medium text-slate-800 dark:text-slate-100">
           {step.question}
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Выберите все верные утверждения (кликайте по каждому)
-        </p>
       </div>
 
       {/* Options */}
       <div className="space-y-3">
-        {step.options.map((option) => {
-          const isSelected = option.id === selectedAnswer;
-          const isCorrectOption = option.isCorrect;
-          
+        {step.options.map((option, index) => {
+          const isSelected = index === selectedAnswer;
+          const isCorrectOption = index === step.correctAnswer;
+
           let optionStyle = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20';
-          
+
           if (showResult && isSelected) {
             optionStyle = isCorrectOption
               ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-700'
@@ -63,8 +59,8 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
 
           return (
             <button
-              key={option.id}
-              onClick={() => handleSelect(option.id)}
+              key={index}
+              onClick={() => handleSelect(index)}
               disabled={showResult}
               className={`
                 w-full flex items-start gap-3 p-4 rounded-2xl border-2
@@ -75,7 +71,7 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
             >
               {/* Option indicator */}
               <div className={`
-                w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5
+                w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0
                 ${showResult && isSelected && isCorrectOption
                   ? 'bg-emerald-500 border-emerald-500 text-white'
                   : showResult && isSelected && !isCorrectOption
@@ -89,20 +85,20 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
                 {showResult && isSelected && !isCorrectOption && <XCircle className="w-4 h-4" />}
                 {!showResult && (
                   <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
-                    {option.id.toUpperCase()}
+                    {String.fromCharCode(65 + index)}
                   </span>
                 )}
               </div>
 
               {/* Option text */}
-              <span className={`text-sm leading-relaxed ${
+              <span className={`text-sm leading-relaxed pt-0.5 ${
                 showResult && isSelected && !isCorrectOption
                   ? 'text-red-700 dark:text-red-300'
                   : showResult && (isSelected || isCorrectOption)
                     ? 'text-emerald-700 dark:text-emerald-300'
                     : 'text-slate-700 dark:text-slate-200'
               }`}>
-                {option.text}
+                {option}
               </span>
             </button>
           );
@@ -113,21 +109,21 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
       {showResult && (
         <div className={`
           p-4 rounded-2xl border-l-4 animate-in slide-in-from-bottom-2 duration-300
-          ${hasCorrectAnswer
+          ${isCorrect
             ? 'bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-400'
             : 'bg-red-50/80 dark:bg-red-900/20 border-red-400'
           }
         `}>
           <div className="flex items-center gap-2 mb-2">
-            {hasCorrectAnswer ? (
+            {isCorrect ? (
               <>
                 <CheckCircle className="w-5 h-5 text-emerald-500" />
-                <span className="font-semibold text-emerald-700 dark:text-emerald-300">Верно!</span>
+                <span className="font-semibold text-emerald-700 dark:text-emerald-300">Верно! 🎉</span>
               </>
             ) : (
               <>
                 <XCircle className="w-5 h-5 text-red-500" />
-                <span className="font-semibold text-red-700 dark:text-red-300">Не совсем...</span>
+                <span className="font-semibold text-red-700 dark:text-red-300">Неверно</span>
               </>
             )}
           </div>
