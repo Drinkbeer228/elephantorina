@@ -248,6 +248,7 @@ export default function App() {
       {/* Main content — сразу под лентой шагов, без FAB и бокового меню */}
       <main className="h-[calc(100dvh_-_105px)] overflow-hidden pb-safe mt-2">
         <StepViewer
+          key={currentStep.id}
           step={currentStep}
           steps={allSteps}
           currentIndex={currentIndex}

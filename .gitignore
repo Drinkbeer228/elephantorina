@@ -3,3 +3,7 @@ node_modules/
 dist/
 build/
 *.log
+
+# helper artifacts (not part of the app)
+slohnology-*.patch
+slohnology-*.bundle

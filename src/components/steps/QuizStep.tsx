@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, HelpCircle, ClipboardCheck, RotateCcw } from 'lucide-react';
 import { QuizStep as QuizStepType } from '../../types/course';
 
@@ -15,8 +15,15 @@ interface Props {
 
 export default function QuizStep({ step, selectedAnswer, isCompleted, onAnswer, onComplete, onNext }: Props) {
   const hasAnswered = selectedAnswer !== undefined;
-  // Режим результатов показываем только после того, как пользователь нажал «Завершить тест»
-  const [submitted, setSubmitted] = useState<boolean>(Boolean(isCompleted) && hasAnswered);
+  // ЕДИНСТВЕННЫЙ источник истины для режима результатов: шаг сдан ли нет.
+  // Локальный флаг нужен только для мгновенного отклика до записи в стор.
+  const [justSubmitted, setJustSubmitted] = useState<boolean>(false);
+  const submitted = Boolean(isCompleted) || justSubmitted;
+
+  // Сброс локального флага при переходе между шагами (компонент не размонтируется)
+  useEffect(() => {
+    setJustSubmitted(false);
+  }, [step.id]);
 
   const isCorrect = selectedAnswer === step.correctAnswer;
   const scorePercent = hasAnswered ? (isCorrect ? 100 : 0) : 0;
@@ -30,12 +37,12 @@ export default function QuizStep({ step, selectedAnswer, isCompleted, onAnswer, 
   // синхронно считает результат, сохраняет прогресс и включает экран разбора.
   const handleSubmit = () => {
     if (!hasAnswered || submitted) return;
-    setSubmitted(true);
+    setJustSubmitted(true);
     onComplete(); // completedSteps / score -> localStorage
   };
 
   const handleRetry = () => {
-    setSubmitted(false);
+    setJustSubmitted(false);
   };
 
   return (
