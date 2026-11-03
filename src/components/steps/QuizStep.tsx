@@ -130,6 +130,18 @@ export default function QuizStep({ step, selectedAnswer, onAnswer }: Props) {
           <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             {step.explanation}
           </p>
+
+          {/* Разбор выбранного неправильного ответа */}
+          {!isCorrect && step.wrongExplanation && step.wrongExplanation[selectedAnswer!] && (
+            <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-800">
+              <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">
+                Почему вариант {String.fromCharCode(65 + selectedAnswer!)} ошибочен:
+              </p>
+              <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
+                {step.wrongExplanation[selectedAnswer!]}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

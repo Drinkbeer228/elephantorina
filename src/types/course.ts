@@ -27,6 +27,7 @@ export interface QuizStep extends BaseStep {
   options: string[];
   correctAnswer: number;
   explanation: string;
+  wrongExplanation?: string[]; // Разбор каждого неправильного варианта ответа
 }
 
 // Степ с карточками
