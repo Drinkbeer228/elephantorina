@@ -1,3 +1,4 @@
+node_modules/
 dist/
 
 # helper artifacts (not part of the app)
