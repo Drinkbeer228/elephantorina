@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import StepViewer from './components/StepViewer';
+import Dashboard from './components/Dashboard';
 import { COURSES_DATA } from './data/coursesData';
 import { UserProgress, Step } from './types/course';
 
@@ -11,6 +12,8 @@ const STORAGE_KEY = 'elephantology-edu-progress';
 interface ProgressStore {
   [courseId: string]: UserProgress;
 }
+
+type ViewType = 'DASHBOARD' | 'LESSON';
 
 function loadProgress(): ProgressStore {
   try {
@@ -55,6 +58,7 @@ export default function App() {
       return COURSES_DATA[0].id;
     }
   });
+  const [currentView, setCurrentView] = useState<ViewType>('DASHBOARD');
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('elephantology-dark-mode') === 'true';
@@ -138,6 +142,14 @@ export default function App() {
     }));
   }, [updateProgress]);
 
+  const handleScenarioAnswer = useCallback((stepId: string, optionId: string) => {
+    updateProgress(prev => ({
+      ...prev,
+      scenarioAnswers: { ...prev.scenarioAnswers, [stepId]: optionId },
+      lastActivity: new Date().toISOString()
+    }));
+  }, [updateProgress]);
+
   const handleToggleBookmark = useCallback((stepId: string) => {
     updateProgress(prev => {
       const bookmarks = prev.bookmarks.includes(stepId)
@@ -147,19 +159,42 @@ export default function App() {
     });
   }, [updateProgress]);
 
-  const handleScenarioAnswer = useCallback((stepId: string, optionId: string) => {
-    updateProgress(prev => ({
-      ...prev,
-      scenarioAnswers: { ...prev.scenarioAnswers, [stepId]: optionId },
-      lastActivity: new Date().toISOString()
-    }));
-  }, [updateProgress]);
-
   const handleSelectCourse = useCallback((courseId: string) => {
     setCurrentCourseId(courseId);
+    setCurrentView('LESSON');
     setSidebarOpen(false);
   }, []);
 
+  const handleGoToDashboard = useCallback(() => {
+    setCurrentView('DASHBOARD');
+  }, []);
+
+  // Dashboard View
+  if (currentView === 'DASHBOARD') {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+        <Header
+          courseTitle="Главная"
+          courseIcon="Home"
+          progress={0}
+          score={0}
+          darkMode={darkMode}
+          onToggleDarkMode={() => setDarkMode(prev => !prev)}
+          courses={COURSES_DATA}
+          currentCourseId={currentCourseId}
+          onSelectCourse={handleSelectCourse}
+          onLogoClick={handleGoToDashboard}
+        />
+        <Dashboard
+          courses={COURSES_DATA}
+          progressStore={progressStore}
+          onSelectCourse={handleSelectCourse}
+        />
+      </div>
+    );
+  }
+
+  // Lesson View
   if (!currentStep) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -181,6 +216,7 @@ export default function App() {
         courses={COURSES_DATA}
         currentCourseId={currentCourseId}
         onSelectCourse={handleSelectCourse}
+        onLogoClick={handleGoToDashboard}
       />
 
       {/* Main layout */}

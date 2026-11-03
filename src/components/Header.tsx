@@ -12,6 +12,7 @@ interface HeaderProps {
   courses: Course[];
   currentCourseId: string;
   onSelectCourse: (courseId: string) => void;
+  onLogoClick?: () => void;
 }
 
 function getCourseIcon(iconName: string) {
@@ -22,6 +23,8 @@ function getCourseIcon(iconName: string) {
       return <span className="text-lg">👥</span>;
     case 'ShieldCross':
       return <span className="text-lg">🛡️</span>;
+    case 'Home':
+      return <span className="text-lg">🏠</span>;
     default:
       return <GraduationCap className="w-5 h-5" />;
   }
@@ -35,7 +38,8 @@ export default function Header({
   onToggleDarkMode,
   courses,
   currentCourseId,
-  onSelectCourse
+  onSelectCourse,
+  onLogoClick
 }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const currentCourse = courses.find(c => c.id === currentCourseId) || courses[0];
@@ -46,12 +50,15 @@ export default function Header({
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={onLogoClick}
+              className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity"
+            >
               <span className="text-2xl">🐘</span>
               <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent truncate">
                 Слонология.EDU
               </h1>
-            </div>
+            </button>
           </div>
 
           {/* Course selector + progress */}
