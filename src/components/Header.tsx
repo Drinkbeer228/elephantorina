@@ -51,6 +51,7 @@ export default function Header({
 
   // Переключатель трека/урока нужен ТОЛЬКО внутри урока.
   // На главной (dashboard) он дублирует большие карточки курсов — скрываем.
+  // Строгое условие: true только при явном currentView === 'lesson'.
   const showTrackSwitcher = currentView === 'lesson';
 
   const renderDropdownMenu = (compact: boolean) => (
