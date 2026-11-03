@@ -9,8 +9,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 3000,
     strictPort: true,
-    allowedHosts: true, // <-- отключает блокировку хостов для любых туннелей
-    allowedHosts: true, // <-- РАЗРЕШАЕТ ЛЮБЫЕ ВНЕШНИЕ ТУННЕЛИ
+    allowedHosts: [
+      ".lhr.life",     // разрешает любые поддомены localhost.run
+      "localhost",
+      "127.0.0.1",
+    ],
     hmr: {
       port: 3000,
     },
