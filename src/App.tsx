@@ -8,7 +8,11 @@ import { UserProgress, Step } from './types/course';
 
 const STORAGE_KEY = 'elephantology-edu-progress';
 
-function loadProgress(): UserProgress {
+interface ProgressStore {
+  [courseId: string]: UserProgress;
+}
+
+function loadProgress(): ProgressStore {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -17,10 +21,22 @@ function loadProgress(): UserProgress {
   } catch (e) {
     console.error('Failed to load progress:', e);
   }
+  return {};
+}
+
+function saveProgress(store: ProgressStore) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  } catch (e) {
+    console.error('Failed to save progress:', e);
+  }
+}
+
+function createDefaultProgress(courseId: string): UserProgress {
   return {
-    courseId: 'track-1-anatomy',
+    courseId,
     completedSteps: [],
-    currentStepId: 'step-1-1-1',
+    currentStepId: '',
     score: 0,
     bookmarks: [],
     quizAnswers: {},
@@ -29,23 +45,15 @@ function loadProgress(): UserProgress {
   };
 }
 
-function saveProgress(progress: UserProgress) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch (e) {
-    console.error('Failed to save progress:', e);
-  }
-}
-
 export default function App() {
-  const course = COURSES_DATA[0];
-  
-  // Собираем все степы из всех модулей и уроков в плоский массив
-  const allSteps: Step[] = course.modules.flatMap(m => 
-    m.lessons.flatMap(l => l.steps)
-  );
-
-  const [progress, setProgress] = useState<UserProgress>(loadProgress);
+  const [progressStore, setProgressStore] = useState<ProgressStore>(loadProgress);
+  const [currentCourseId, setCurrentCourseId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('elephantology-current-course') || COURSES_DATA[0].id;
+    } catch {
+      return COURSES_DATA[0].id;
+    }
+  });
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('elephantology-dark-mode') === 'true';
@@ -55,10 +63,27 @@ export default function App() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const course = COURSES_DATA.find(c => c.id === currentCourseId) || COURSES_DATA[0];
+  
+  // Собираем все степы из всех модулей и уроков в плоский массив
+  const allSteps: Step[] = course.modules.flatMap(m => 
+    m.lessons.flatMap(l => l.steps)
+  );
+
+  // Получаем или создаём прогресс для текущего курса
+  const progress: UserProgress = progressStore[currentCourseId] 
+    ? { ...progressStore[currentCourseId], currentStepId: progressStore[currentCourseId].currentStepId || allSteps[0]?.id || '' }
+    : { ...createDefaultProgress(currentCourseId), currentStepId: allSteps[0]?.id || '' };
+
   // Save progress on change
   useEffect(() => {
-    saveProgress(progress);
-  }, [progress]);
+    saveProgress(progressStore);
+  }, [progressStore]);
+
+  // Save current course
+  useEffect(() => {
+    localStorage.setItem('elephantology-current-course', currentCourseId);
+  }, [currentCourseId]);
 
   // Dark mode effect
   useEffect(() => {
@@ -71,21 +96,29 @@ export default function App() {
   }, [darkMode]);
 
   const currentStep = allSteps.find(s => s.id === progress.currentStepId) || allSteps[0];
-  const currentIndex = allSteps.findIndex(s => s.id === currentStep.id);
+  const currentIndex = allSteps.findIndex(s => s.id === currentStep?.id);
   const totalSteps = allSteps.length;
   const completedCount = progress.completedSteps.length;
   const progressPercent = totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0;
 
+  const updateProgress = useCallback((updater: (prev: UserProgress) => UserProgress) => {
+    setProgressStore(prev => ({
+      ...prev,
+      [currentCourseId]: updater(prev[currentCourseId] || { ...createDefaultProgress(currentCourseId), currentStepId: allSteps[0]?.id || '' })
+    }));
+  }, [currentCourseId, allSteps]);
+
   const handleSelectStep = useCallback((stepId: string) => {
-    setProgress(prev => ({
+    updateProgress(prev => ({
       ...prev,
       currentStepId: stepId,
       lastActivity: new Date().toISOString()
     }));
-  }, []);
+  }, [updateProgress]);
 
   const handleCompleteStep = useCallback(() => {
-    setProgress(prev => {
+    if (!currentStep) return;
+    updateProgress(prev => {
       if (prev.completedSteps.includes(currentStep.id)) return prev;
       return {
         ...prev,
@@ -94,24 +127,37 @@ export default function App() {
         lastActivity: new Date().toISOString()
       };
     });
-  }, [currentStep.id]);
+  }, [currentStep, updateProgress]);
 
   const handleQuizAnswer = useCallback((stepId: string, answerIndex: number) => {
-    setProgress(prev => ({
+    updateProgress(prev => ({
       ...prev,
       quizAnswers: { ...prev.quizAnswers, [stepId]: answerIndex },
       lastActivity: new Date().toISOString()
     }));
-  }, []);
+  }, [updateProgress]);
 
   const handleToggleBookmark = useCallback((stepId: string) => {
-    setProgress(prev => {
+    updateProgress(prev => {
       const bookmarks = prev.bookmarks.includes(stepId)
         ? prev.bookmarks.filter(id => id !== stepId)
         : [...prev.bookmarks, stepId];
       return { ...prev, bookmarks, lastActivity: new Date().toISOString() };
     });
+  }, [updateProgress]);
+
+  const handleSelectCourse = useCallback((courseId: string) => {
+    setCurrentCourseId(courseId);
+    setSidebarOpen(false);
   }, []);
+
+  if (!currentStep) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <p className="text-slate-500">Нет доступных степов</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -123,6 +169,9 @@ export default function App() {
         score={progress.score}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(prev => !prev)}
+        courses={COURSES_DATA}
+        currentCourseId={currentCourseId}
+        onSelectCourse={handleSelectCourse}
       />
 
       {/* Main layout */}
