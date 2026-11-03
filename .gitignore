@@ -1,5 +1,8 @@
 node_modules/
+.next/
 dist/
+build/
+*.log
 
 # helper artifacts (not part of the app)
 slohnology-*.patch
