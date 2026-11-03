@@ -1,4 +1,4 @@
-import { BookOpen, Brain, Shield, Rocket, CheckCircle2, Layers, HelpCircle, Stethoscope, Users, Heart, Activity } from 'lucide-react';
+import { Brain, Shield, Rocket, Users, Activity } from 'lucide-react';
 import { Course, UserProgress } from '../types/course';
 
 interface DashboardProps {
@@ -83,7 +83,7 @@ export default function Dashboard({ courses, progressStore, onSelectCourse }: Da
         </div>
 
         {/* Courses Catalog */}
-        <div className="mb-10">
+        <div>
           <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
             <Rocket className="w-6 h-6 text-[#0593C6]" />
             Выберите учебный трек
@@ -165,74 +165,6 @@ export default function Dashboard({ courses, progressStore, onSelectCourse }: Da
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Quick Start Guide */}
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/50 shadow-lg p-6 sm:p-8">
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-[#D83996]" />
-            Быстрый старт
-          </h3>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Theory */}
-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#0593C6]/10 to-[#7C5CE0]/10 rounded-2xl border border-[#0593C6]/20">
-              <BookOpen className="w-5 h-5 text-[#0593C6] shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-[#0593C6] mb-1">Теория</p>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Фундаментальные знания с клиническими рекомендациями
-                </p>
-              </div>
-            </div>
-
-            {/* Quiz */}
-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#7C5CE0]/10 to-[#D83996]/10 rounded-2xl border border-[#7C5CE0]/20">
-              <HelpCircle className="w-5 h-5 text-[#7C5CE0] shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-[#7C5CE0] mb-1">Тесты</p>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Проверка знаний с мгновенной обратной связью
-                </p>
-              </div>
-            </div>
-
-            {/* Flashcards */}
-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#00B4D8]/10 to-[#0077B6]/10 rounded-2xl border border-[#00B4D8]/20">
-              <Layers className="w-5 h-5 text-[#00B4D8] shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-[#00B4D8] mb-1">Карточки</p>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Интерактивные 3D-карточки для запоминания терминов
-                </p>
-              </div>
-            </div>
-
-            {/* Scenario */}
-            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-[#D83996]/10 to-[#FF6B9D]/10 rounded-2xl border border-[#D83996]/20">
-              <Stethoscope className="w-5 h-5 text-[#D83996] shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-[#D83996] mb-1">Симуляторы</p>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Клинические кейсы для тренировки мышления
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 p-4 bg-gradient-to-r from-[#0593C6]/5 to-[#D83996]/5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-[#0593C6] shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                  Совет
-                </p>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Прогресс автоматически сохраняется. Возвращайтесь к урокам в любое время. Кликайте на закладки, чтобы отмечать важные материалы.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
