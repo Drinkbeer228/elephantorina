@@ -63,7 +63,10 @@ export default function StepViewer({
           <QuizStepComponent
             step={step}
             selectedAnswer={quizAnswers[step.id]}
+            isCompleted={isCompleted}
             onAnswer={onQuizAnswer}
+            onComplete={onComplete}
+            onNext={handleNext}
           />
         );
       case 'FLASHCARD':
