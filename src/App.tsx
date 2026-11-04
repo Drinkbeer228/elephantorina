@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 import LessonHeader from './components/LessonHeader';
 import StepViewer from './components/StepViewer';
 import Dashboard from './components/Dashboard';
@@ -58,45 +59,25 @@ export default function App() {
     }
   });
   const [currentView, setCurrentView] = useState<ViewType>('DASHBOARD');
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      return localStorage.getItem('elephantology-dark-mode') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const course = COURSES_DATA.find(c => c.id === currentCourseId) || COURSES_DATA[0];
   
-  // Собираем все степы из всех модулей и уроков в плоский массив
   const allSteps: Step[] = course.modules.flatMap(m => 
     m.lessons.flatMap(l => l.steps)
   );
 
-  // Получаем или создаём прогресс для текущего курса
   const progress: UserProgress = progressStore[currentCourseId] 
     ? { ...progressStore[currentCourseId], currentStepId: progressStore[currentCourseId].currentStepId || allSteps[0]?.id || '' }
     : { ...createDefaultProgress(currentCourseId), currentStepId: allSteps[0]?.id || '' };
 
-  // Save progress on change
   useEffect(() => {
     saveProgress(progressStore);
   }, [progressStore]);
 
-  // Save current course
   useEffect(() => {
     localStorage.setItem('elephantology-current-course', currentCourseId);
   }, [currentCourseId]);
-
-  // Dark mode effect
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('elephantology-dark-mode', String(darkMode));
-  }, [darkMode]);
 
   const currentStep = allSteps.find(s => s.id === progress.currentStepId) || allSteps[0];
   const currentIndex = allSteps.findIndex(s => s.id === currentStep?.id);
@@ -104,15 +85,10 @@ export default function App() {
   const completedCount = progress.completedSteps.length;
   const progressPercent = totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0;
 
-  // Находим урок, к которому относится текущий степ (для шапки в стиле Stepik)
   const currentLesson = course.modules.flatMap(m => m.lessons).find(l =>
     l.steps.some(s => s.id === currentStep?.id)
   );
 
-  // Шаги текущего урока — для ленты табов; если урок не найден, показываем все шаги курса
-  const lessonSteps: Step[] = currentLesson?.steps ?? allSteps;
-
-  // Читаемый номер урока из заголовка («Урок 1.2: ...» -> «1.2») либо позиционный
   const lessonNumber = (() => {
     if (!currentLesson) return undefined;
     const match = currentLesson.title.match(/Урок\s+([\d.]+)/i);
@@ -122,7 +98,6 @@ export default function App() {
     return idx >= 0 ? String(idx + 1) : undefined;
   })();
 
-  // Название урока без префикса «Урок X.Y:»
   const lessonTitle = (() => {
     if (!currentLesson) return course.title;
     const colonIdx = currentLesson.title.indexOf(':');
@@ -193,22 +168,15 @@ export default function App() {
     setCurrentView('DASHBOARD');
   }, []);
 
-  // Dashboard View
   if (currentView === 'DASHBOARD') {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <div className="min-h-screen bg-[#F8F7F4] text-[#1C1E1F]">
         <Header
           currentView="dashboard"
-          courseTitle="Главная"
-          courseIcon="Home"
-          progress={0}
-          score={0}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode(prev => !prev)}
-          courses={COURSES_DATA}
-          currentCourseId={currentCourseId}
-          onSelectCourse={handleSelectCourse}
-          onLogoClick={handleGoToDashboard}
+          courseTitle={course.title}
+          progress={progressPercent}
+          score={progress.score}
+          onGoToDashboard={handleGoToDashboard}
         />
         <Dashboard
           courses={COURSES_DATA}
@@ -219,50 +187,55 @@ export default function App() {
     );
   }
 
-  // Lesson View
-  if (!currentStep) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <p className="text-slate-500">Нет доступных степов</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      {/* Шапка урока в стиле нативного iOS-приложения Stepik:
-          Top App Bar + горизонтальная лента шагов */}
-      <LessonHeader
-        lessonTitle={lessonTitle}
-        lessonNumber={lessonNumber}
-        steps={lessonSteps}
-        currentStepId={currentStep.id}
-        completedSteps={progress.completedSteps}
-        onSelectStep={handleSelectStep}
-        onBack={handleGoToDashboard}
-        darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode(prev => !prev)}
+    <div className="min-h-screen bg-[#F8F7F4] text-[#1C1E1F] flex flex-col">
+      <Header
+        currentView="lesson"
+        courseTitle={course.title}
+        progress={progressPercent}
         score={progress.score}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onGoToDashboard={handleGoToDashboard}
       />
 
-      {/* Main content — сразу под лентой шагов, без FAB и бокового меню */}
-      <main className="h-[calc(100dvh_-_105px)] overflow-hidden pb-safe mt-2">
-        <StepViewer
-          key={currentStep.id}
-          step={currentStep}
-          steps={allSteps}
-          currentIndex={currentIndex}
-          completedSteps={progress.completedSteps}
-          bookmarks={progress.bookmarks}
-          quizAnswers={progress.quizAnswers}
-          scenarioAnswers={progress.scenarioAnswers}
-          onNavigate={handleSelectStep}
-          onComplete={handleCompleteStep}
-          onQuizAnswer={handleQuizAnswer}
-          onScenarioAnswer={handleScenarioAnswer}
-          onToggleBookmark={handleToggleBookmark}
+      <div className="flex flex-1 min-h-0">
+        <Sidebar
+          course={course}
+          progress={progress}
+          onSelectStep={handleSelectStep}
+          onGoToDashboard={handleGoToDashboard}
+          isOpen={sidebarOpen}
+          onToggleOpen={() => setSidebarOpen(!sidebarOpen)}
         />
-      </main>
+
+        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+          <LessonHeader
+            lessonTitle={lessonTitle}
+            lessonNumber={lessonNumber}
+            steps={allSteps}
+            currentStepId={progress.currentStepId}
+            completedSteps={progress.completedSteps}
+            onSelectStep={handleSelectStep}
+            onBack={handleGoToDashboard}
+            score={progress.score}
+          />
+
+          <StepViewer
+            step={currentStep}
+            steps={allSteps}
+            currentIndex={currentIndex}
+            completedSteps={progress.completedSteps}
+            bookmarks={progress.bookmarks}
+            quizAnswers={progress.quizAnswers}
+            scenarioAnswers={progress.scenarioAnswers}
+            onNavigate={handleSelectStep}
+            onComplete={handleCompleteStep}
+            onQuizAnswer={handleQuizAnswer}
+            onScenarioAnswer={handleScenarioAnswer}
+            onToggleBookmark={handleToggleBookmark}
+          />
+        </main>
+      </div>
     </div>
   );
 }

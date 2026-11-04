@@ -1,0 +1,5 @@
+{
+  "name": "Слонология.EDU",
+  "description": "Слонология.EDU — интерактивная PWA-платформа для обучения анатомии и физиологии слонов",
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
