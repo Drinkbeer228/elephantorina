@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { BookOpen, ChevronRight, CheckCircle2, ChevronLeft, Menu, Compass } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, Check, X, Compass } from 'lucide-react';
 import { Course, UserProgress } from '../types/course';
 
 interface SidebarProps {
+  courses: Course[];
   course: Course;
   progress: UserProgress;
+  onSelectCourse: (courseId: string) => void;
   onSelectStep: (stepId: string) => void;
   onGoToDashboard: () => void;
   isOpen: boolean;
@@ -12,168 +14,221 @@ interface SidebarProps {
 }
 
 export default function Sidebar({
+  courses,
   course,
   progress,
+  onSelectCourse,
   onSelectStep,
   onGoToDashboard,
   isOpen,
   onToggleOpen,
 }: SidebarProps) {
-  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>(() => {
-    // Раскрываем все модули по умолчанию
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+
+  // Keep the module containing the active step expanded automatically
+  useEffect(() => {
     const initial: Record<string, boolean> = {};
-    course.modules.forEach(m => { initial[m.id] = true; });
-    return initial;
-  });
+    course.modules.forEach((m, idx) => {
+      const hasCurrentStep = m.lessons.some((l) =>
+        l.steps.some((s) => s.id === progress.currentStepId)
+      );
+      initial[m.id] = hasCurrentStep || idx < 2;
+    });
+    setExpandedModules(initial);
+  }, [course.id, progress.currentStepId, course.modules]);
 
   const toggleModule = (modId: string) => {
-    setExpandedModules(prev => ({ ...prev, [modId]: !prev[modId] }));
+    setExpandedModules((prev) => ({ ...prev, [modId]: !prev[modId] }));
   };
 
-  const totalSteps = course.modules.flatMap(m => m.lessons.flatMap(l => l.steps)).length;
-  const completedSteps = progress.completedSteps.length;
+  const totalSteps = course.modules.flatMap((m) => m.lessons.flatMap((l) => l.steps)).length;
+  const completedSteps = course.modules
+    .flatMap((m) => m.lessons.flatMap((l) => l.steps))
+    .filter((s) => progress.completedSteps.includes(s.id)).length;
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
   return (
     <>
-      {/* Кнопка открытия на мобильных / когда закрыто */}
-      {!isOpen && (
-        <button
-          onClick={onToggleOpen}
-          className="fixed left-4 bottom-4 z-40 bg-[#2E5A44] text-white p-3 rounded-full shadow-lg hover:bg-[#244936] transition-all flex items-center justify-center md:hidden"
-          aria-label="Открыть навигацию по курсу"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-      )}
-
-      {/* Оверлей для мобилок */}
+      {/* Mobile Backdrop */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 md:hidden" 
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40 lg:hidden"
           onClick={onToggleOpen}
         />
       )}
 
-      {/* Боковая панель */}
-      <aside className={`
-        fixed top-0 left-0 bottom-0 z-50 w-80 bg-white border-r border-[#E6E4DD] flex flex-col transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:static md:w-72'}
-      `}>
-        {/* Шапка сайдбара */}
-        <div className="p-4 border-b border-[#E6E4DD] flex items-center justify-between bg-[#F8F7F4]/50">
-          <button
-            onClick={onGoToDashboard}
-            className="flex items-center gap-2 text-sm font-semibold text-[#1C1E1F] hover:text-[#2E5A44] transition-colors"
-          >
-            <Compass className="w-4 h-4 text-[#2E5A44]" />
-            <span>Все курсы</span>
-          </button>
-          <button
-            onClick={onToggleOpen}
-            className="p-1.5 rounded-lg text-[#606462] hover:bg-[#E6E4DD]/50 transition-colors md:hidden"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+      {/* Curriculum Sidebar */}
+      <aside
+        aria-label="Структура учебного трека"
+        className={`fixed top-0 left-0 bottom-0 z-50 w-80 bg-[#FBF9F5] border-r border-[#E4DFD3] flex flex-col transition-transform duration-200 ease-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:static lg:w-80 shrink-0'
+        }`}
+      >
+        {/* Track Selector Header */}
+        <div className="p-4 border-b border-[#E4DFD3] bg-white space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={onGoToDashboard}
+              className="inline-flex items-center gap-2 text-xs font-semibold text-[#1E4631] hover:underline cursor-pointer"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Все академические треки</span>
+            </button>
+            <button
+              type="button"
+              onClick={onToggleOpen}
+              aria-label="Закрыть оглавление"
+              className="p-1.5 rounded-lg text-[#5C615D] hover:bg-[#F3EFE6] transition-colors lg:hidden cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div>
+            <label
+              htmlFor="sidebar-track-select"
+              className="block text-[11px] font-bold uppercase tracking-wider text-[#5C615D] mb-1"
+            >
+              Активный трек ({courses.length})
+            </label>
+            <select
+              id="sidebar-track-select"
+              value={course.id}
+              onChange={(e) => onSelectCourse(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-[#FBF9F5] border border-[#D8D2C2] text-xs font-semibold text-[#181A18] cursor-pointer"
+            >
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Прогресс курса */}
-        <div className="p-4 border-b border-[#E6E4DD] bg-[#F8F7F4]/30">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-[#606462] uppercase tracking-wider">Прогресс трека</span>
-            <span className="text-xs font-bold text-[#2E5A44]">{progressPercent}%</span>
+        {/* Track Progress Telemetry */}
+        <div className="px-4 py-3.5 border-b border-[#E4DFD3] bg-[#F3EFE6]/60">
+          <div className="flex items-center justify-between mb-1.5 text-xs">
+            <span className="font-semibold text-[#5C615D]">Освоение трека</span>
+            <span className="font-mono-code font-bold text-[#1E4631] tabular-nums">
+              {completedSteps} / {totalSteps} ({progressPercent}%)
+            </span>
           </div>
-          <div className="h-2 bg-[#E6E4DD] rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[#E4DFD3] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#2E5A44] rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-[#1E4631] transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="text-xs text-[#606462] mt-1.5 font-medium">{completedSteps} из {totalSteps} шагов пройденo</p>
         </div>
 
-        {/* Список модулей и уроков */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          <h2 className="px-2 text-xs font-semibold text-[#606462] uppercase tracking-wider">Структура курса</h2>
+        {/* Modules & Lessons Tree */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
           {course.modules.map((mod, modIdx) => {
-            const isExpanded = expandedModules[mod.id] ?? true;
-            const modStepsCount = mod.lessons.flatMap(l => l.steps).length;
-            const modCompletedCount = mod.lessons.flatMap(l => l.steps).filter(s => progress.completedSteps.includes(s.id)).length;
-            const isModComplete = modStepsCount > 0 && modCompletedCount === modStepsCount;
+            const isExpanded = expandedModules[mod.id] ?? false;
+            const modSteps = mod.lessons.flatMap((l) => l.steps);
+            const modCompleted = modSteps.filter((s) =>
+              progress.completedSteps.includes(s.id)
+            ).length;
+            const isModComplete = modSteps.length > 0 && modCompleted === modSteps.length;
 
             return (
-              <div key={mod.id} className="border border-[#E6E4DD] rounded-xl overflow-hidden bg-white">
+              <div
+                key={mod.id}
+                className="border border-[#E4DFD3] rounded-xl overflow-hidden bg-white"
+              >
                 <button
+                  type="button"
                   onClick={() => toggleModule(mod.id)}
-                  className="w-full flex items-center justify-between p-3 text-left hover:bg-[#F8F7F4] transition-colors"
+                  aria-expanded={isExpanded}
+                  className="w-full flex items-start justify-between gap-2.5 p-3 text-left hover:bg-[#FBF9F5] transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="w-6 h-6 rounded-md bg-[#2E5A44]/10 text-[#2E5A44] text-xs font-bold flex items-center justify-center shrink-0">
-                      {modIdx}
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <span
+                      className={`w-6 h-6 rounded text-[11px] font-mono-code font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+                        isModComplete
+                          ? 'bg-[#1E4631] text-white'
+                          : 'bg-[#F3EFE6] text-[#1E4631] border border-[#E4DFD3]'
+                      }`}
+                    >
+                      {isModComplete ? (
+                        <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      ) : (
+                        String(modIdx + 1).padStart(2, '0')
+                      )}
                     </span>
-                    <span className="text-sm font-semibold text-[#1C1E1F] truncate">{mod.title}</span>
+                    <div className="min-w-0">
+                      <span className="block text-xs font-semibold text-[#181A18] leading-snug line-clamp-2">
+                        {mod.title}
+                      </span>
+                      <span className="block text-[11px] text-[#5C615D] mt-0.5 tabular-nums">
+                        {modCompleted} из {modSteps.length} шагов
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {isModComplete && <CheckCircle2 className="w-4 h-4 text-[#2E5A44]" />}
-                    <ChevronRight className={`w-4 h-4 text-[#606462] transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                  </div>
+                  <ChevronRight
+                    className={`w-4 h-4 text-[#5C615D] shrink-0 mt-1 transition-transform ${
+                      isExpanded ? 'rotate-90' : ''
+                    }`}
+                  />
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-[#E6E4DD] bg-[#F8F7F4]/30 divide-y divide-[#E6E4DD]/50">
-                    {mod.lessons.map((lesson) => {
-                      const lessonCompleted = lesson.steps.every(s => progress.completedSteps.includes(s.id));
-                      const isCurrentLesson = lesson.steps.some(s => s.id === progress.currentStepId);
+                  <div className="border-t border-[#E4DFD3] bg-[#FBF9F5] divide-y divide-[#E4DFD3]/70">
+                    {mod.lessons.map((lesson) => (
+                      <div key={lesson.id} className="p-2.5 space-y-1">
+                        <p className="px-2 py-0.5 text-[11px] font-semibold text-[#5C615D] leading-snug">
+                          {lesson.title}
+                        </p>
+                        <div className="space-y-0.5">
+                          {lesson.steps.map((step, sIdx) => {
+                            const isSelected = step.id === progress.currentStepId;
+                            const isCompleted = progress.completedSteps.includes(step.id);
 
-                      return (
-                        <div key={lesson.id} className="p-2 space-y-1">
-                          <div className="flex items-center justify-between px-2 py-1">
-                            <span className="text-xs font-medium text-[#606462] truncate flex-1">{lesson.title}</span>
-                            {lessonCompleted && <CheckCircle2 className="w-3.5 h-3.5 text-[#2E5A44] shrink-0 ml-1" />}
-                          </div>
-                          <div className="pl-2 space-y-0.5">
-                            {lesson.steps.map((step) => {
-                              const isSelected = step.id === progress.currentStepId;
-                              const isCompleted = progress.completedSteps.includes(step.id);
-
-                              return (
-                                <button
-                                  key={step.id}
-                                  onClick={() => {
-                                    onSelectStep(step.id);
-                                    if (window.innerWidth < 768) {
-                                      onToggleOpen();
-                                    }
-                                  }}
-                                  className={`
-                                    w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-2
-                                    ${isSelected
-                                      ? 'bg-[#2E5A44] text-white font-medium shadow-xs'
+                            return (
+                              <button
+                                key={step.id}
+                                type="button"
+                                onClick={() => {
+                                  onSelectStep(step.id);
+                                  if (window.innerWidth < 1024) {
+                                    onToggleOpen();
+                                  }
+                                }}
+                                className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition-colors flex items-center gap-2.5 cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[#1E4631] text-white font-semibold'
+                                    : isCompleted
+                                      ? 'text-[#181A18] hover:bg-[#F3EFE6]'
+                                      : 'text-[#5C615D] hover:bg-[#F3EFE6]/70'
+                                }`}
+                              >
+                                <span
+                                  className={`font-mono-code text-[10px] w-4 text-center shrink-0 ${
+                                    isSelected
+                                      ? 'text-white/90 font-bold'
                                       : isCompleted
-                                        ? 'text-[#1C1E1F] hover:bg-[#E6E4DD]/50'
-                                        : 'text-[#606462] hover:bg-[#E6E4DD]/40'
-                                    }
-                                  `}
+                                        ? 'text-[#1E4631] font-bold'
+                                        : 'text-[#7A7F7A]'
+                                  }`}
                                 >
-                                  <span className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? 'bg-[#2E5A44]' : isSelected ? 'bg-white' : 'bg-[#E6E4DD]'}`} />
-                                  <span className="truncate flex-1">{step.title}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
+                                  {isCompleted ? '✓' : `${sIdx + 1}.`}
+                                </span>
+                                <span className="truncate flex-1">
+                                  {step.title.replace(/^\d+\.\s*/, '')}
+                                </span>
+                              </button>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             );
           })}
-        </div>
-
-        {/* Футер сайдбара */}
-        <div className="p-3 border-t border-[#E6E4DD] bg-[#F8F7F4]/55 text-center">
-          <p className="text-xs text-[#606462]">Слонология.EDU • Тактильный дизайн</p>
         </div>
       </aside>
     </>

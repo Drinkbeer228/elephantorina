@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import Header from './components/Header';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import Header, { DashboardSection } from './components/Header';
 import Sidebar from './components/Sidebar';
 import LessonHeader from './components/LessonHeader';
 import StepViewer from './components/StepViewer';
 import Dashboard from './components/Dashboard';
 import { COURSES_DATA } from './data/coursesData';
-import { UserProgress, Step } from './types/course';
+import { UserProgress } from './types/course';
+import { getLessonContext, computeGlobalStats } from './utils/courseUtils';
 
 const STORAGE_KEY = 'elephantology-edu-progress';
 
@@ -19,7 +20,10 @@ function loadProgress(): ProgressStore {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        return parsed;
+      }
     }
   } catch (e) {
     console.error('Failed to load progress:', e);
@@ -45,7 +49,7 @@ function createDefaultProgress(courseId: string): UserProgress {
     quizAnswers: {},
     scenarioAnswers: {},
     startedAt: new Date().toISOString(),
-    lastActivity: new Date().toISOString()
+    lastActivity: new Date().toISOString(),
   };
 }
 
@@ -59,171 +63,240 @@ export default function App() {
     }
   });
   const [currentView, setCurrentView] = useState<ViewType>('DASHBOARD');
+  const [dashboardSection, setDashboardSection] = useState<DashboardSection>('catalog');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-  const course = COURSES_DATA.find(c => c.id === currentCourseId) || COURSES_DATA[0];
-  
-  const allSteps: Step[] = course.modules.flatMap(m => 
-    m.lessons.flatMap(l => l.steps)
+  const course = useMemo(
+    () => COURSES_DATA.find((c) => c.id === currentCourseId) || COURSES_DATA[0],
+    [currentCourseId]
   );
 
-  const progress: UserProgress = progressStore[currentCourseId] 
-    ? { ...progressStore[currentCourseId], currentStepId: progressStore[currentCourseId].currentStepId || allSteps[0]?.id || '' }
-    : { ...createDefaultProgress(currentCourseId), currentStepId: allSteps[0]?.id || '' };
+  const allCourseSteps = useMemo(
+    () => course.modules.flatMap((m) => m.lessons.flatMap((l) => l.steps)),
+    [course]
+  );
+
+  const progress: UserProgress = useMemo(() => {
+    const existing = progressStore[course.id];
+    const fallbackStepId = allCourseSteps[0]?.id || '';
+    if (!existing) {
+      return {
+        ...createDefaultProgress(course.id),
+        currentStepId: fallbackStepId,
+      };
+    }
+    const validStep = allCourseSteps.some((s) => s.id === existing.currentStepId)
+      ? existing.currentStepId
+      : fallbackStepId;
+    return {
+      ...createDefaultProgress(course.id),
+      ...existing,
+      completedSteps: Array.isArray(existing.completedSteps) ? existing.completedSteps : [],
+      bookmarks: Array.isArray(existing.bookmarks) ? existing.bookmarks : [],
+      quizAnswers: existing.quizAnswers || {},
+      scenarioAnswers: existing.scenarioAnswers || {},
+      currentStepId: validStep,
+    };
+  }, [progressStore, course.id, allCourseSteps]);
 
   useEffect(() => {
     saveProgress(progressStore);
   }, [progressStore]);
 
   useEffect(() => {
-    localStorage.setItem('elephantology-current-course', currentCourseId);
+    try {
+      localStorage.setItem('elephantology-current-course', currentCourseId);
+    } catch {
+      // Ignore storage quota errors
+    }
   }, [currentCourseId]);
 
-  const currentStep = allSteps.find(s => s.id === progress.currentStepId) || allSteps[0];
-  const currentIndex = allSteps.findIndex(s => s.id === currentStep?.id);
-  const totalSteps = allSteps.length;
-  const completedCount = progress.completedSteps.length;
-  const progressPercent = totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0;
-
-  const currentLesson = course.modules.flatMap(m => m.lessons).find(l =>
-    l.steps.some(s => s.id === currentStep?.id)
+  const lessonCtx = useMemo(
+    () => getLessonContext(course, progress.currentStepId),
+    [course, progress.currentStepId]
   );
 
-  const lessonNumber = (() => {
-    if (!currentLesson) return undefined;
-    const match = currentLesson.title.match(/Урок\s+([\d.]+)/i);
-    if (match) return match[1];
-    const lessons = course.modules.flatMap(m => m.lessons);
-    const idx = lessons.findIndex(l => l.id === currentLesson.id);
-    return idx >= 0 ? String(idx + 1) : undefined;
-  })();
+  const globalStats = useMemo(
+    () => computeGlobalStats(COURSES_DATA, progressStore),
+    [progressStore]
+  );
 
-  const lessonTitle = (() => {
-    if (!currentLesson) return course.title;
-    const colonIdx = currentLesson.title.indexOf(':');
-    return colonIdx > -1 && /^урок/i.test(currentLesson.title)
-      ? currentLesson.title.slice(colonIdx + 1).trim()
-      : currentLesson.title;
-  })();
+  const currentStep =
+    allCourseSteps.find((s) => s.id === progress.currentStepId) || allCourseSteps[0];
 
-  const updateProgress = useCallback((updater: (prev: UserProgress) => UserProgress) => {
-    setProgressStore(prev => ({
-      ...prev,
-      [currentCourseId]: updater(prev[currentCourseId] || { ...createDefaultProgress(currentCourseId), currentStepId: allSteps[0]?.id || '' })
-    }));
-  }, [currentCourseId, allSteps]);
+  const updateCourseProgress = useCallback(
+    (targetCourseId: string, updater: (prev: UserProgress) => UserProgress) => {
+      setProgressStore((prev) => {
+        const targetCourse =
+          COURSES_DATA.find((c) => c.id === targetCourseId) || COURSES_DATA[0];
+        const firstStep =
+          targetCourse.modules[0]?.lessons[0]?.steps[0]?.id || '';
+        const base = prev[targetCourseId] || {
+          ...createDefaultProgress(targetCourseId),
+          currentStepId: firstStep,
+        };
+        return {
+          ...prev,
+          [targetCourseId]: updater(base),
+        };
+      });
+    },
+    []
+  );
 
-  const handleSelectStep = useCallback((stepId: string) => {
-    updateProgress(prev => ({
-      ...prev,
-      currentStepId: stepId,
-      lastActivity: new Date().toISOString()
-    }));
-  }, [updateProgress]);
+  const handleSelectStep = useCallback(
+    (stepId: string) => {
+      updateCourseProgress(course.id, (prev) => ({
+        ...prev,
+        currentStepId: stepId,
+        lastActivity: new Date().toISOString(),
+      }));
+    },
+    [course.id, updateCourseProgress]
+  );
 
   const handleCompleteStep = useCallback(() => {
     if (!currentStep) return;
-    updateProgress(prev => {
+    updateCourseProgress(course.id, (prev) => {
       if (prev.completedSteps.includes(currentStep.id)) return prev;
       return {
         ...prev,
         completedSteps: [...prev.completedSteps, currentStep.id],
-        score: prev.score + 10,
-        lastActivity: new Date().toISOString()
+        score: (prev.score || 0) + 10,
+        lastActivity: new Date().toISOString(),
       };
     });
-  }, [currentStep, updateProgress]);
+  }, [course.id, currentStep, updateCourseProgress]);
 
-  const handleQuizAnswer = useCallback((stepId: string, answerIndex: number) => {
-    updateProgress(prev => ({
-      ...prev,
-      quizAnswers: { ...prev.quizAnswers, [stepId]: answerIndex },
-      lastActivity: new Date().toISOString()
-    }));
-  }, [updateProgress]);
+  const handleQuizAnswer = useCallback(
+    (stepId: string, answerIndex: number) => {
+      updateCourseProgress(course.id, (prev) => ({
+        ...prev,
+        quizAnswers: { ...prev.quizAnswers, [stepId]: answerIndex },
+        lastActivity: new Date().toISOString(),
+      }));
+    },
+    [course.id, updateCourseProgress]
+  );
 
-  const handleScenarioAnswer = useCallback((stepId: string, optionId: string) => {
-    updateProgress(prev => ({
-      ...prev,
-      scenarioAnswers: { ...prev.scenarioAnswers, [stepId]: optionId },
-      lastActivity: new Date().toISOString()
-    }));
-  }, [updateProgress]);
+  const handleScenarioAnswer = useCallback(
+    (stepId: string, optionId: string) => {
+      updateCourseProgress(course.id, (prev) => ({
+        ...prev,
+        scenarioAnswers: { ...prev.scenarioAnswers, [stepId]: optionId },
+        lastActivity: new Date().toISOString(),
+      }));
+    },
+    [course.id, updateCourseProgress]
+  );
 
-  const handleToggleBookmark = useCallback((stepId: string) => {
-    updateProgress(prev => {
-      const bookmarks = prev.bookmarks.includes(stepId)
-        ? prev.bookmarks.filter(id => id !== stepId)
-        : [...prev.bookmarks, stepId];
-      return { ...prev, bookmarks, lastActivity: new Date().toISOString() };
-    });
-  }, [updateProgress]);
+  const handleToggleBookmarkInCourse = useCallback(
+    (targetCourseId: string, stepId: string) => {
+      updateCourseProgress(targetCourseId, (prev) => {
+        const bookmarks = prev.bookmarks.includes(stepId)
+          ? prev.bookmarks.filter((id) => id !== stepId)
+          : [...prev.bookmarks, stepId];
+        return { ...prev, bookmarks, lastActivity: new Date().toISOString() };
+      });
+    },
+    [updateCourseProgress]
+  );
 
-  const handleSelectCourse = useCallback((courseId: string) => {
-    setCurrentCourseId(courseId);
-    setCurrentView('LESSON');
-  }, []);
+  const handleSelectCourse = useCallback(
+    (courseId: string, optionalStepId?: string) => {
+      setCurrentCourseId(courseId);
+      if (optionalStepId) {
+        updateCourseProgress(courseId, (prev) => ({
+          ...prev,
+          currentStepId: optionalStepId,
+          lastActivity: new Date().toISOString(),
+        }));
+      }
+      setCurrentView('LESSON');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [updateCourseProgress]
+  );
 
   const handleGoToDashboard = useCallback(() => {
     setCurrentView('DASHBOARD');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   if (currentView === 'DASHBOARD') {
     return (
-      <div className="min-h-screen bg-[#F8F7F4] text-[#1C1E1F]">
+      <div className="min-h-screen bg-[#FBF9F5] text-[#181A18]">
         <Header
           currentView="dashboard"
-          courseTitle={course.title}
-          progress={progressPercent}
-          score={progress.score}
+          activeSection={dashboardSection}
+          bookmarksCount={globalStats.bookmarksCount}
+          onNavigateSection={(sec) => {
+            setDashboardSection(sec);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           onGoToDashboard={handleGoToDashboard}
+          onResumeLesson={() => setCurrentView('LESSON')}
         />
         <Dashboard
           courses={COURSES_DATA}
           progressStore={progressStore}
+          activeSection={dashboardSection}
+          onChangeSection={(sec) => {
+            setDashboardSection(sec);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           onSelectCourse={handleSelectCourse}
+          onToggleBookmark={handleToggleBookmarkInCourse}
         />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F7F4] text-[#1C1E1F] flex flex-col">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#181A18] flex flex-col">
       <Header
         currentView="lesson"
-        courseTitle={course.title}
-        progress={progressPercent}
-        score={progress.score}
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        activeSection={dashboardSection}
+        bookmarksCount={globalStats.bookmarksCount}
+        onNavigateSection={(sec) => {
+          setDashboardSection(sec);
+          setCurrentView('DASHBOARD');
+        }}
         onGoToDashboard={handleGoToDashboard}
       />
 
       <div className="flex flex-1 min-h-0">
         <Sidebar
+          courses={COURSES_DATA}
           course={course}
           progress={progress}
+          onSelectCourse={(cId) => handleSelectCourse(cId)}
           onSelectStep={handleSelectStep}
           onGoToDashboard={handleGoToDashboard}
           isOpen={sidebarOpen}
           onToggleOpen={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <main className="flex-1 flex flex-col min-w-0">
           <LessonHeader
-            lessonTitle={lessonTitle}
-            lessonNumber={lessonNumber}
-            steps={allSteps}
+            courseTitle={course.title}
+            moduleTitle={lessonCtx.currentModule.title}
+            lessonTitle={lessonCtx.cleanLessonTitle}
+            lessonNumber={lessonCtx.lessonNumber}
+            steps={lessonCtx.lessonSteps}
             currentStepId={progress.currentStepId}
             completedSteps={progress.completedSteps}
             onSelectStep={handleSelectStep}
             onBack={handleGoToDashboard}
-            score={progress.score}
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           />
 
           <StepViewer
             step={currentStep}
-            steps={allSteps}
-            currentIndex={currentIndex}
+            courseSteps={lessonCtx.courseSteps}
+            courseStepIndex={lessonCtx.courseStepIndex}
+            lessonSteps={lessonCtx.lessonSteps}
+            lessonStepIndex={lessonCtx.lessonStepIndex}
             completedSteps={progress.completedSteps}
             bookmarks={progress.bookmarks}
             quizAnswers={progress.quizAnswers}
@@ -232,7 +305,8 @@ export default function App() {
             onComplete={handleCompleteStep}
             onQuizAnswer={handleQuizAnswer}
             onScenarioAnswer={handleScenarioAnswer}
-            onToggleBookmark={handleToggleBookmark}
+            onToggleBookmark={(stepId) => handleToggleBookmarkInCourse(course.id, stepId)}
+            onFinishCourse={handleGoToDashboard}
           />
         </main>
       </div>

@@ -1,186 +1,204 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, XCircle, RotateCcw, Stethoscope } from 'lucide-react';
 import { ScenarioStep as ScenarioStepType } from '../../types/course';
+import { formatInlineHtml } from '../../utils/courseUtils';
 
 interface Props {
   step: ScenarioStepType;
   selectedOptionId: string | undefined;
   onSelectOption: (stepId: string, optionId: string) => void;
+  onComplete?: () => void;
 }
 
-export default function ScenarioStep({ step, selectedOptionId, onSelectOption }: Props) {
+export default function ScenarioStep({
+  step,
+  selectedOptionId,
+  onSelectOption,
+  onComplete,
+}: Props) {
   const [localSelection, setLocalSelection] = useState<string | undefined>(selectedOptionId);
+
+  useEffect(() => {
+    setLocalSelection(selectedOptionId);
+  }, [selectedOptionId, step.id]);
 
   const handleSelect = (optionId: string) => {
     setLocalSelection(optionId);
     onSelectOption(step.id, optionId);
+    const chosen = step.options.find((o) => o.id === optionId);
+    if (chosen?.isCorrect && onComplete) {
+      onComplete();
+    }
   };
 
   const handleRetry = () => {
     setLocalSelection(undefined);
   };
 
-  const selectedOption = step.options.find(o => o.id === localSelection);
+  const selectedOption = step.options.find((o) => o.id === localSelection);
   const isCorrect = selectedOption?.isCorrect;
   const hasAnswered = localSelection !== undefined;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Title */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center">
-          <Stethoscope className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+    <section className="animate-in bg-white border border-[#E4DFD3] rounded-2xl p-6 sm:p-10 space-y-6">
+      {/* Header */}
+      <header className="pb-5 border-b border-[#E4DFD3]">
+        <div className="flex items-center gap-2 text-xs font-medium text-[#9A4B26] mb-2">
+          <Stethoscope className="w-4 h-4" />
+          <span>Клинико-экологический симулятор принятия решений</span>
         </div>
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
-            {step.title}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Клинический симулятор</p>
-        </div>
-      </div>
+        <h1
+          className="font-display text-2xl sm:text-3xl font-bold text-[#181A18] tracking-tight"
+          style={{ textWrap: 'balance' }}
+        >
+          {step.title}
+        </h1>
+      </header>
 
-      {/* Patient Card */}
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-700/50 rounded-3xl p-5 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 flex items-center justify-center text-4xl shadow-inner">
-            {step.patientInfo.avatarEmoji || '🐘'}
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-              {step.patientInfo.avatarEmoji || '🐘'} {step.patientInfo.name} ({step.patientInfo.age} лет)
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              {step.patientInfo.role}
-            </p>
-          </div>
+      {/* Patient / Subject Dossier */}
+      <div className="bg-[#FBF9F5] border border-[#D8D2C2] rounded-xl p-5">
+        <div className="text-xs font-bold uppercase tracking-wider text-[#5C615D] mb-3 pb-2 border-b border-[#E4DFD3] flex items-center justify-between">
+          <span>Карта объекта / Пациент</span>
+          <span className="font-mono-code">CASE DOSSIER</span>
         </div>
-      </div>
-
-      {/* Situation Block */}
-      <div className="bg-amber-50/80 dark:bg-amber-900/20 backdrop-blur-xl border border-amber-200/80 dark:border-amber-700/50 rounded-3xl p-5 shadow-sm">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+        <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div>
-            <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">
-              ⚠️ Клиническая ситуация
-            </p>
-            <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed">
-              {step.situation}
-            </p>
+            <dt className="text-xs text-[#5C615D]">Объект наблюдения</dt>
+            <dd className="font-semibold text-[#181A18] mt-0.5">{step.patientInfo.name}</dd>
           </div>
+          <div>
+            <dt className="text-xs text-[#5C615D]">Возраст / Год оценки</dt>
+            <dd className="font-mono-code font-semibold text-[#181A18] mt-0.5 tabular-nums">
+              {step.patientInfo.age > 1900
+                ? `${step.patientInfo.age} г.`
+                : `${step.patientInfo.age} лет`}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-[#5C615D]">Контекст / Статус</dt>
+            <dd className="font-medium text-[#1E4631] mt-0.5">{step.patientInfo.role}</dd>
+          </div>
+        </dl>
+      </div>
+
+      {/* Clinical Situation */}
+      <div className="bg-[#F9F4EE] border border-[#E0C8B0] rounded-xl p-5 space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9A4B26]">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Описание ситуации и анамнез</span>
         </div>
+        <p
+          className="text-sm sm:text-[15.5px] text-[#181A18] leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: formatInlineHtml(step.situation) }}
+        />
       </div>
 
-      {/* Action Prompt */}
-      <div className="text-center">
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-          Ваши действия?
-        </p>
-      </div>
-
-      {/* Options */}
+      {/* Decision Options */}
       <div className="space-y-3">
-        {step.options.map((option) => {
+        <p className="text-xs font-bold uppercase tracking-wider text-[#5C615D]">
+          Выберите научно обоснованный протокол действий:
+        </p>
+
+        {step.options.map((option, idx) => {
           const isSelected = option.id === localSelection;
           const isCorrectOption = option.isCorrect;
+          const labelCode = String.fromCharCode(65 + idx);
 
-          let optionStyle = 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 hover:shadow-md';
+          let cardStyle =
+            'bg-white border-[#E4DFD3] hover:border-[#1E4631] hover:bg-[#FBF9F5]';
+          let badgeStyle = 'bg-[#F3EFE6] border-[#D8D2C2] text-[#181A18]';
 
           if (hasAnswered) {
             if (isSelected && isCorrectOption) {
-              optionStyle = 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-700 shadow-md';
+              cardStyle = 'bg-[#F2F7F4] border-[#1E4631]';
+              badgeStyle = 'bg-[#1E4631] border-[#1E4631] text-white';
             } else if (isSelected && !isCorrectOption) {
-              optionStyle = 'bg-red-50/80 dark:bg-red-900/30 border-red-400 dark:border-red-500 ring-2 ring-red-200 dark:ring-red-700 shadow-md';
+              cardStyle = 'bg-[#FDF4F3] border-[#9E2A2B]';
+              badgeStyle = 'bg-[#9E2A2B] border-[#9E2A2B] text-white';
             } else {
-              optionStyle = 'bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-50';
+              cardStyle = 'bg-[#FBF9F5] border-[#E4DFD3] opacity-65';
             }
           }
 
           return (
             <button
               key={option.id}
+              type="button"
               onClick={() => handleSelect(option.id)}
               disabled={hasAnswered}
-              className={`
-                w-full flex items-start gap-4 p-4 rounded-2xl border-2
-                text-left transition-all duration-200 min-h-[54px]
-                ${optionStyle}
-                ${!hasAnswered ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'}
-              `}
+              className={`w-full flex items-start gap-4 p-4 sm:p-5 rounded-xl border text-left transition-colors ${cardStyle} ${
+                !hasAnswered ? 'cursor-pointer' : 'cursor-default'
+              }`}
             >
-              {/* Option indicator */}
-              <div className={`
-                w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0
-                ${hasAnswered && isSelected && isCorrectOption
-                  ? 'bg-emerald-500 border-emerald-500 text-white'
-                  : hasAnswered && isSelected && !isCorrectOption
-                    ? 'bg-red-500 border-red-500 text-white'
-                    : hasAnswered && isCorrectOption
-                      ? 'border-emerald-400 dark:border-emerald-500'
-                      : 'border-slate-300 dark:border-slate-600'
-                }
-              `}>
-                {hasAnswered && isSelected && isCorrectOption && <CheckCircle2 className="w-5 h-5" />}
-                {hasAnswered && isSelected && !isCorrectOption && <XCircle className="w-5 h-5" />}
-                {!hasAnswered && (
-                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
-                    {option.id.toUpperCase()}
-                  </span>
+              <div
+                className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 font-mono-code text-xs font-bold mt-0.5 ${badgeStyle}`}
+              >
+                {hasAnswered && isSelected && isCorrectOption ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : hasAnswered && isSelected && !isCorrectOption ? (
+                  <XCircle className="w-4 h-4" />
+                ) : (
+                  labelCode
                 )}
               </div>
 
-              {/* Option text */}
-              <span className={`text-sm leading-relaxed pt-1 ${
-                hasAnswered && isSelected && !isCorrectOption
-                  ? 'text-red-700 dark:text-red-300'
-                  : hasAnswered && (isSelected || isCorrectOption)
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : 'text-slate-700 dark:text-slate-200'
-              }`}>
-                {option.text}
-              </span>
+              <span
+                className="text-sm sm:text-[15px] text-[#181A18] leading-relaxed flex-1"
+                dangerouslySetInnerHTML={{ __html: formatInlineHtml(option.text) }}
+              />
             </button>
           );
         })}
       </div>
 
-      {/* Feedback */}
+      {/* Outcome Feedback */}
       {hasAnswered && selectedOption && (
-        <div className={`
-          rounded-3xl border-l-4 p-5 animate-in slide-in-from-bottom-2 duration-300
-          ${isCorrect
-            ? 'bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-400 dark:border-emerald-500'
-            : 'bg-red-50/80 dark:bg-red-900/20 border-red-400 dark:border-red-500'
-          }
-        `}>
-          <div className="flex items-start gap-3">
+        <div
+          className={`rounded-xl border p-5 sm:p-6 space-y-3 animate-in ${
+            isCorrect
+              ? 'bg-[#F4F8F5] border-[#B8D1C1]'
+              : 'bg-[#FDF6F5] border-[#E4BDBC]'
+          }`}
+        >
+          <div className="flex items-center gap-2 pb-2.5 border-b border-black/10">
             {isCorrect ? (
-              <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
+              <>
+                <CheckCircle2 className="w-5 h-5 text-[#1E4631] shrink-0" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1E4631]">
+                  Протокол утвержден · Клинически и научно верно
+                </span>
+              </>
             ) : (
-              <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+              <>
+                <XCircle className="w-5 h-5 text-[#9E2A2B] shrink-0" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#9E2A2B]">
+                  Критический риск · Ошибочное решение
+                </span>
+              </>
             )}
-            <div className="flex-1">
-              <p className={`text-sm font-bold uppercase tracking-wider mb-2 ${
-                isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-              }`}>
-                {isCorrect ? '🟢 КЛИНИЧЕСКИ ВЕРНО' : '🔴 ОПАСНОЕ РЕШЕНИЕ'}
-              </p>
-              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                {selectedOption.feedback}
-              </p>
-              {!isCorrect && (
-                <button
-                  onClick={handleRetry}
-                  className="mt-3 flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Попробовать другое решение
-                </button>
-              )}
-            </div>
           </div>
+
+          <p
+            className="text-sm sm:text-[15px] text-[#181A18] leading-relaxed"
+            dangerouslySetInnerHTML={{
+              __html: formatInlineHtml(selectedOption.feedback),
+            }}
+          />
+
+          {!isCorrect && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#D8D2C2] rounded-lg text-xs font-semibold text-[#181A18] hover:bg-[#F3EFE6] transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Выбрать другой протокол действий</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

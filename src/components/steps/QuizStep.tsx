@@ -1,89 +1,128 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, HelpCircle, ClipboardCheck, RotateCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, ClipboardCheck, RotateCcw, ArrowRight } from 'lucide-react';
 import { QuizStep as QuizStepType } from '../../types/course';
+import { formatInlineHtml } from '../../utils/courseUtils';
 
 interface Props {
   step: QuizStepType;
   selectedAnswer: number | undefined;
   isCompleted?: boolean;
   onAnswer: (stepId: string, answerIndex: number) => void;
-  /** Сохранение прогресса шага (onComplete -> запись в localStorage в App) */
   onComplete: () => void;
-  /** Переход к следующему шагу */
   onNext?: () => void;
 }
 
-export default function QuizStep({ step, selectedAnswer, isCompleted, onAnswer, onComplete, onNext }: Props) {
+export default function QuizStep({
+  step,
+  selectedAnswer,
+  isCompleted,
+  onAnswer,
+  onComplete,
+  onNext,
+}: Props) {
   const hasAnswered = selectedAnswer !== undefined;
-  // ЕДИНСТВЕННЫЙ источник истины для режима результатов: шаг сдан ли нет.
-  // Локальный флаг нужен только для мгновенного отклика до записи в стор.
   const [justSubmitted, setJustSubmitted] = useState<boolean>(false);
-  const submitted = Boolean(isCompleted) || justSubmitted;
+  const [retrying, setRetrying] = useState<boolean>(false);
 
-  // Сброс локального флага при переходе между шагами (компонент не размонтируется)
+  const submitted = (Boolean(isCompleted) || justSubmitted) && !retrying;
+
   useEffect(() => {
     setJustSubmitted(false);
+    setRetrying(false);
   }, [step.id]);
 
   const isCorrect = selectedAnswer === step.correctAnswer;
-  const scorePercent = hasAnswered ? (isCorrect ? 100 : 0) : 0;
 
   const handleSelect = (index: number) => {
     if (submitted) return;
     onAnswer(step.id, index);
   };
 
-  // Обработчик кнопки «Завершить тест»: без async-ловушек и preventDefault —
-  // синхронно считает результат, сохраняет прогресс и включает экран разбора.
   const handleSubmit = () => {
     if (!hasAnswered || submitted) return;
+    setRetrying(false);
     setJustSubmitted(true);
-    onComplete(); // completedSteps / score -> localStorage
+    onComplete();
   };
 
   const handleRetry = () => {
     setJustSubmitted(false);
+    setRetrying(true);
   };
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Title */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
-          <HelpCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-        </div>
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
-            {step.title}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Проверь свои знания</p>
-        </div>
-      </div>
+  // Resolve wrongExplanation safely: in coursesData, wrongExplanation has 3 entries for the 3 wrong options
+  const getWrongFeedback = (selectedIdx: number | undefined): string | null => {
+    if (selectedIdx === undefined || selectedIdx === step.correctAnswer || !step.wrongExplanation) {
+      return null;
+    }
+    if (step.wrongExplanation.length === step.options.length) {
+      return step.wrongExplanation[selectedIdx] || null;
+    }
+    // Map index among non-correct options
+    const wrongIndices = step.options
+      .map((_, i) => i)
+      .filter((i) => i !== step.correctAnswer);
+    const pos = wrongIndices.indexOf(selectedIdx);
+    return pos >= 0 ? step.wrongExplanation[pos] || null : step.wrongExplanation[0] || null;
+  };
 
-      {/* Question */}
-      <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-        <p className="text-lg font-medium text-slate-800 dark:text-slate-100">
-          {step.question}
-        </p>
+  const specificWrongFeedback = getWrongFeedback(selectedAnswer);
+
+  return (
+    <section className="animate-in bg-white border border-[#E4DFD3] rounded-2xl p-6 sm:p-10 space-y-6">
+      {/* Header */}
+      <header className="pb-5 border-b border-[#E4DFD3]">
+        <div className="flex items-center gap-2 text-xs font-medium text-[#5C615D] mb-2">
+          <span>Контроль усвоения материала</span>
+          <span aria-hidden="true">·</span>
+          <span>Академическое тестирование</span>
+        </div>
+        <h1
+          className="font-display text-2xl sm:text-3xl font-bold text-[#181A18] tracking-tight"
+          style={{ textWrap: 'balance' }}
+        >
+          {step.title}
+        </h1>
+      </header>
+
+      {/* Question Card */}
+      <div className="p-5 sm:p-6 bg-[#FBF9F5] rounded-xl border border-[#E4DFD3]">
+        <p
+          className="text-base sm:text-lg font-semibold text-[#181A18] leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: formatInlineHtml(step.question) }}
+        />
       </div>
 
       {/* Options */}
-      <div className="space-y-3">
+      <div className="space-y-3" role="radiogroup" aria-label={step.title}>
         {step.options.map((option, index) => {
           const isSelected = index === selectedAnswer;
           const isCorrectOption = index === step.correctAnswer;
+          const letter = String.fromCharCode(65 + index);
 
-          let optionStyle = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20';
+          let cardClass =
+            'bg-white border-[#E4DFD3] hover:border-[#1E4631]/60 hover:bg-[#FBF9F5]';
+          let badgeClass = 'bg-[#F3EFE6] border-[#D8D2C2] text-[#5C615D]';
+          let textClass = 'text-[#181A18]';
 
           if (submitted && isSelected) {
-            optionStyle = isCorrectOption
-              ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-700'
-              : 'bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-500 ring-2 ring-red-200 dark:ring-red-700';
+            if (isCorrectOption) {
+              cardClass = 'bg-[#F2F7F4] border-[#1E4631]';
+              badgeClass = 'bg-[#1E4631] border-[#1E4631] text-white';
+              textClass = 'text-[#143322] font-medium';
+            } else {
+              cardClass = 'bg-[#FDF4F3] border-[#9E2A2B]';
+              badgeClass = 'bg-[#9E2A2B] border-[#9E2A2B] text-white';
+              textClass = 'text-[#6E1B1C] font-medium';
+            }
           } else if (submitted && isCorrectOption) {
-            optionStyle = 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-600';
+            cardClass = 'bg-[#F2F7F4]/70 border-[#1E4631]/60';
+            badgeClass = 'bg-[#E3EFE8] border-[#1E4631] text-[#1E4631]';
+            textClass = 'text-[#143322]';
           } else if (isSelected) {
-            // Выбранный, но ещё не отправленный вариант — подсветка перед проверкой
-            optionStyle = 'bg-[#0593C6]/5 dark:bg-[#0593C6]/15 border-[#0593C6] dark:border-[#3BA8D8] ring-2 ring-[#0593C6]/20 dark:ring-[#3BA8D8]/25';
+            cardClass = 'bg-[#F3EFE6]/80 border-[#1E4631] ring-1 ring-[#1E4631]/30';
+            badgeClass = 'bg-[#1E4631] border-[#1E4631] text-white';
+            textClass = 'text-[#181A18] font-medium';
           }
 
           return (
@@ -92,158 +131,145 @@ export default function QuizStep({ step, selectedAnswer, isCompleted, onAnswer, 
               type="button"
               onClick={() => handleSelect(index)}
               disabled={submitted}
-              className={`
-                w-full flex items-start gap-3 p-4 rounded-2xl border-2
-                text-left transition-all duration-200
-                ${optionStyle}
-                ${!submitted ? 'cursor-pointer active:scale-[0.99]' : 'cursor-default'}
-              `}
+              className={`w-full flex items-start gap-4 p-4 sm:p-5 rounded-xl border text-left transition-colors ${cardClass} ${
+                !submitted ? 'cursor-pointer' : 'cursor-default'
+              }`}
             >
-              {/* Option indicator */}
-              <div className={`
-                w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0
-                ${submitted && isSelected && isCorrectOption
-                  ? 'bg-emerald-500 border-emerald-500 text-white'
-                  : submitted && isSelected && !isCorrectOption
-                    ? 'bg-red-500 border-red-500 text-white'
-                    : submitted && isCorrectOption
-                      ? 'border-emerald-400 dark:border-emerald-500'
-                      : isSelected
-                        ? 'border-[#0593C6] bg-[#0593C6] text-white'
-                        : 'border-slate-300 dark:border-slate-600'
-                }
-              `}>
-                {submitted && isSelected && isCorrectOption && <CheckCircle className="w-4 h-4" />}
-                {submitted && isSelected && !isCorrectOption && <XCircle className="w-4 h-4" />}
-                {!submitted && (
-                  <span className={`text-xs font-bold ${isSelected ? '' : 'text-slate-400 dark:text-slate-500'}`}>
-                    {String.fromCharCode(65 + index)}
-                  </span>
+              <div
+                className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 font-mono-code text-xs font-bold mt-0.5 ${badgeClass}`}
+              >
+                {submitted && isSelected && isCorrectOption ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : submitted && isSelected && !isCorrectOption ? (
+                  <XCircle className="w-4 h-4" />
+                ) : (
+                  letter
                 )}
               </div>
 
-              {/* Option text */}
-              <span className={`text-sm leading-relaxed pt-0.5 ${
-                submitted && isSelected && !isCorrectOption
-                  ? 'text-red-700 dark:text-red-300'
-                  : submitted && (isSelected || isCorrectOption)
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : 'text-slate-700 dark:text-slate-200'
-              }`}>
-                {option}
-              </span>
+              <div className="flex-1 min-w-0">
+                <span
+                  className={`block text-sm sm:text-[15px] leading-relaxed ${textClass}`}
+                  dangerouslySetInnerHTML={{ __html: formatInlineHtml(option) }}
+                />
+                {submitted && isCorrectOption && (
+                  <span className="inline-block mt-1.5 text-xs font-semibold text-[#1E4631]">
+                    ✓ Эталонный научный ответ
+                  </span>
+                )}
+                {submitted && isSelected && !isCorrectOption && (
+                  <span className="inline-block mt-1.5 text-xs font-semibold text-[#9E2A2B]">
+                    ✕ Выбранный ответ содержит ошибку
+                  </span>
+                )}
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Submit zone — кнопка активна, если выбран хотя бы один вариант */}
+      {/* Submit Action */}
       {!submitted && (
-        <div className="pt-1">
+        <div className="pt-2">
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!hasAnswered}
-            title={hasAnswered ? 'Подсчитать результат и открыть разбор' : 'Сначала выберите один вариант ответа'}
-            className={`
-              w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl
-              font-semibold text-sm transition-all duration-200
-              ${hasAnswered
-                ? 'bg-gradient-to-r from-[#0593C6] to-[#D83996] text-white shadow-md hover:shadow-lg hover:brightness-105 active:scale-[0.99] cursor-pointer'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'}
-            `}
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm transition-colors ${
+              hasAnswered
+                ? 'bg-[#1E4631] hover:bg-[#153423] text-white cursor-pointer'
+                : 'bg-[#F3EFE6] text-[#7A7F7A] border border-[#E4DFD3] cursor-not-allowed'
+            }`}
           >
-            <ClipboardCheck className="w-5 h-5" />
-            Завершить тест
+            <ClipboardCheck className="w-4 h-4" />
+            <span>Проверить ответ</span>
           </button>
           {!hasAnswered && (
-            <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
-              Выберите вариант ответа выше, чтобы кнопка стала активной
+            <p className="mt-2 text-center text-xs text-[#5C615D]">
+              Выберите один из вариантов ответа выше для проверки
             </p>
           )}
         </div>
       )}
 
-      {/* Экран результатов: баллы, разбор ошибок, переход к следующему шагу */}
+      {/* Results & Scientific Explanation */}
       {submitted && (
-        <div className={`
-          p-4 rounded-2xl border-l-4 animate-in slide-in-from-bottom-2 duration-300
-          ${isCorrect
-            ? 'bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-400'
-            : 'bg-red-50/80 dark:bg-red-900/20 border-red-400'
-          }
-        `}>
-          <div className="flex items-center justify-between gap-2 mb-2">
+        <div
+          className={`p-5 sm:p-6 rounded-xl border space-y-4 animate-in ${
+            isCorrect
+              ? 'bg-[#F4F8F5] border-[#B8D1C1]'
+              : 'bg-[#FDF6F5] border-[#E4BDBC]'
+          }`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-black/10">
             <div className="flex items-center gap-2">
               {isCorrect ? (
                 <>
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
-                  <span className="font-semibold text-emerald-700 dark:text-emerald-300">Верно! 🎉</span>
+                  <CheckCircle2 className="w-5 h-5 text-[#1E4631]" />
+                  <span className="font-bold text-sm uppercase tracking-wider text-[#1E4631]">
+                    Ответ подтвержден · +10 академических баллов
+                  </span>
                 </>
               ) : (
                 <>
-                  <XCircle className="w-5 h-5 text-red-500" />
-                  <span className="font-semibold text-red-700 dark:text-red-300">Неверно</span>
+                  <XCircle className="w-5 h-5 text-[#9E2A2B]" />
+                  <span className="font-bold text-sm uppercase tracking-wider text-[#9E2A2B]">
+                    Требуется коррекция · Разбор клинико-научной ошибки
+                  </span>
                 </>
               )}
             </div>
-            {/* Баллы за шаг */}
-            <span className={`
-              px-2.5 py-1 rounded-full text-xs font-bold
-              ${isCorrect
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
-                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'}
-            `}>
-              {scorePercent}% · {isCorrect ? '+10' : '+0'} баллов
+            <span className="font-mono-code text-xs font-semibold text-[#5C615D]">
+              Точность: {isCorrect ? '100%' : '0%'}
             </span>
           </div>
 
-          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-            {step.explanation}
-          </p>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#5C615D]">
+              Научное обоснование:
+            </p>
+            <p
+              className="text-sm sm:text-[15px] text-[#181A18] leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: formatInlineHtml(step.explanation) }}
+            />
+          </div>
 
-          {/* Разбор выбранного неправильного ответа */}
-          {!isCorrect && step.wrongExplanation && step.wrongExplanation[selectedAnswer!] && (
-            <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-800">
-              <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">
-                Почему вариант {String.fromCharCode(65 + selectedAnswer!)} ошибочен:
+          {!isCorrect && specificWrongFeedback && (
+            <div className="p-4 rounded-lg bg-white/80 border border-[#E4BDBC] space-y-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#9E2A2B]">
+                Почему вариант {String.fromCharCode(65 + (selectedAnswer ?? 0))} неверен:
               </p>
-              <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-                {step.wrongExplanation[selectedAnswer!]}
-              </p>
+              <p
+                className="text-sm text-[#4A1C1D] leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatInlineHtml(specificWrongFeedback),
+                }}
+              />
             </div>
           )}
 
-          {/* Действия: следующий шаг / пересдача */}
-          <div className="mt-4 flex items-center gap-2">
+          <div className="pt-2 flex flex-wrap items-center gap-3">
             {onNext && (
               <button
                 type="button"
                 onClick={onNext}
-                className={`
-                  flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
-                  font-semibold text-sm text-white transition-all duration-200
-                  ${isCorrect
-                    ? 'bg-emerald-500 hover:bg-emerald-600'
-                    : 'bg-gradient-to-r from-[#0593C6] to-[#D83996] hover:brightness-105'}
-                `}
+                className="flex-1 min-w-[200px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm text-white bg-[#1E4631] hover:bg-[#153423] transition-colors cursor-pointer"
               >
-                {isCorrect ? 'Ответ засчитан — следующий шаг' : 'Перейти к следующему шагу'}
+                <span>Перейти к следующему шагу</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             )}
             <button
               type="button"
               onClick={handleRetry}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium
-                bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-                text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-white border border-[#D8D2C2] text-[#181A18] hover:bg-[#F3EFE6] transition-colors cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
-              Пересдать
+              <span>Пройти заново</span>
             </button>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

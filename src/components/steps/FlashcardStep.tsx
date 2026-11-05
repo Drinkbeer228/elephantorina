@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Layers, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { RotateCcw, CheckCircle2 } from 'lucide-react';
 import { FlashcardStep as FlashcardStepType } from '../../types/course';
+import { formatInlineHtml } from '../../utils/courseUtils';
 
 interface Props {
   step: FlashcardStepType;
@@ -9,8 +10,12 @@ interface Props {
 export default function FlashcardStep({ step }: Props) {
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
+  useEffect(() => {
+    setFlippedCards(new Set());
+  }, [step.id]);
+
   const toggleCard = (index: number) => {
-    setFlippedCards(prev => {
+    setFlippedCards((prev) => {
       const next = new Set(prev);
       if (next.has(index)) {
         next.delete(index);
@@ -21,85 +26,129 @@ export default function FlashcardStep({ step }: Props) {
     });
   };
 
+  const revealAll = () => {
+    if (flippedCards.size === step.cards.length) {
+      setFlippedCards(new Set());
+    } else {
+      setFlippedCards(new Set(step.cards.map((_, i) => i)));
+    }
+  };
+
   const allFlipped = flippedCards.size === step.cards.length;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Title */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
-          <Layers className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-        </div>
+    <section className="animate-in bg-white border border-[#E4DFD3] rounded-2xl p-6 sm:p-10 space-y-6">
+      {/* Header */}
+      <header className="pb-5 border-b border-[#E4DFD3] flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
+          <div className="flex items-center gap-2 text-xs font-medium text-[#5C615D] mb-2">
+            <span>Терминологический глоссарий</span>
+            <span aria-hidden="true">·</span>
+            <span className="tabular-nums">
+              Изучено {flippedCards.size} из {step.cards.length} карточек
+            </span>
+          </div>
+          <h1
+            className="font-display text-2xl sm:text-3xl font-bold text-[#181A18] tracking-tight"
+            style={{ textWrap: 'balance' }}
+          >
             {step.title}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Нажмите на карточку, чтобы перевернуть • {flippedCards.size}/{step.cards.length} изучено
-          </p>
+          </h1>
         </div>
-      </div>
 
-      {/* Cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button
+          type="button"
+          onClick={revealAll}
+          className="px-3.5 py-2 rounded-lg text-xs font-semibold text-[#181A18] bg-[#F3EFE6] hover:bg-[#E4DFD3] border border-[#D8D2C2] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+        >
+          {allFlipped ? 'Скрыть определения' : 'Раскрыть все карточки'}
+        </button>
+      </header>
+
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {step.cards.map((card, index) => {
           const isFlipped = flippedCards.has(index);
 
           return (
-            <div
+            <button
               key={index}
-              className="perspective-1000 cursor-pointer group"
+              type="button"
               onClick={() => toggleCard(index)}
+              aria-label={`Карточка ${index + 1}: ${card.term}. Нажмите для переворота`}
+              className="perspective-1000 text-left cursor-pointer group focus:outline-none"
             >
               <div
-                className={`
-                  relative w-full h-64 transition-transform duration-700 ease-in-out
-                  [transform-style:preserve-3d]
-                  ${isFlipped ? '[transform:rotateY(180deg)]' : ''}
-                `}
+                className={`relative w-full min-h-[220px] transition-transform duration-500 transform-style-3d ${
+                  isFlipped ? 'rotate-y-180' : ''
+                }`}
               >
-                {/* Front */}
-                <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-lg p-6 flex flex-col items-center justify-center text-center group-hover:shadow-xl transition-shadow">
-                  <span className="text-4xl mb-4">📝</span>
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                    {card.term}
-                  </h3>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
-                    Нажмите, чтобы узнать →
-                  </p>
+                {/* Front Face (Term) */}
+                <div className="absolute inset-0 backface-hidden rounded-xl bg-[#FBF9F5] border border-[#D8D2C2] group-hover:border-[#1E4631] p-6 flex flex-col justify-between transition-colors">
+                  <div className="flex items-center justify-between text-xs text-[#5C615D]">
+                    <span className="font-mono-code font-semibold text-[#1E4631]">
+                      ТЕРМИН #{String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span>Нажмите для определения →</span>
+                  </div>
+
+                  <div className="my-auto py-4">
+                    <h2 className="font-display text-2xl font-bold text-[#181A18] leading-snug">
+                      {card.term}
+                    </h2>
+                  </div>
+
+                  <div className="text-xs text-[#7A7F7A] border-t border-[#E4DFD3] pt-3 flex items-center justify-between">
+                    <span>Слонология · Индекс понятий</span>
+                    <RotateCcw className="w-3.5 h-3.5 text-[#5C615D]" />
+                  </div>
                 </div>
 
-                {/* Back */}
-                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-3xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/40 dark:to-purple-900/40 border-2 border-indigo-200 dark:border-indigo-700 shadow-lg p-5 flex flex-col items-center justify-center text-center">
-                  <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-                    {card.definition}
-                  </p>
-                  <div className="mt-3 flex items-center gap-1 text-indigo-500">
-                    <RotateCcw className="w-3 h-3" />
-                    <span className="text-xs">Перевернуть обратно</span>
+                {/* Back Face (Definition) */}
+                <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-xl bg-[#1E4631] text-white border border-[#1E4631] p-6 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-xs text-white/75 border-b border-white/15 pb-2.5">
+                    <span className="font-semibold truncate max-w-[200px]">{card.term}</span>
+                    <span className="font-mono-code text-[11px]">ОПРЕДЕЛЕНИЕ</span>
+                  </div>
+
+                  <div className="my-auto py-3">
+                    <p
+                      className="text-sm sm:text-[15px] text-white/95 leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: formatInlineHtml(card.definition),
+                      }}
+                    />
+                  </div>
+
+                  <div className="text-xs text-white/70 border-t border-white/15 pt-2.5 flex items-center justify-between">
+                    <span>Нажмите, чтобы вернуть термин</span>
+                    <RotateCcw className="w-3.5 h-3.5" />
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
 
-      {/* All flipped indicator */}
+      {/* Completion Banner */}
       {allFlipped && (
-        <div className="p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-700/50 text-center animate-in fade-in duration-300">
-          <span className="text-2xl">🎉</span>
-          <p className="text-emerald-700 dark:text-emerald-300 font-medium mt-1">
-            Отлично! Все карточки изучены!
-          </p>
+        <div className="p-4 bg-[#F4F8F5] rounded-xl border border-[#B8D1C1] flex items-center justify-between gap-4 animate-in">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[#1E4631] shrink-0" />
+            <p className="text-sm font-medium text-[#143322]">
+              Все термины модуля просмотрены. Вы можете перейти к следующему шагу.
+            </p>
+          </div>
           <button
+            type="button"
             onClick={() => setFlippedCards(new Set())}
-            className="mt-2 text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="text-xs font-semibold text-[#1E4631] hover:underline whitespace-nowrap shrink-0 cursor-pointer"
           >
-            Начать заново
+            Сбросить карточки
           </button>
         </div>
       )}
-    </div>
+    </section>
   );
 }
