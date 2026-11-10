@@ -27,6 +27,7 @@ interface Props {
   onSelectCourse: (id: string) => void;
   onStartGlobalExam: () => void;
   onStartCourseExam: (courseId: string) => void;
+  onStartQuiz: () => void;
 }
 
 export default function Home(p: Props) {
@@ -260,6 +261,21 @@ export default function Home(p: Props) {
               <span aria-hidden="true">📝</span>
               <span className="break-words text-left">
                 Зачёт по теме (без подсказок)
+              </span>
+            </span>
+            <span className="font-mono text-emerald-600 dark:text-emerald-400 shrink-0">
+              →
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={p.onStartQuiz}
+            className="press mt-2 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/[0.05] dark:bg-emerald-500/[0.08] px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-emerald-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            <span className="flex items-center gap-2.5 min-w-0">
+              <span aria-hidden="true">🐘</span>
+              <span className="break-words text-left">
+                Викторина о слонах: проверьте знания
               </span>
             </span>
             <span className="font-mono text-emerald-600 dark:text-emerald-400 shrink-0">

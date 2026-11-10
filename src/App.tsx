@@ -3,6 +3,7 @@ import confetti from "canvas-confetti";
 import TopBar from "./elephant/components/TopBar";
 import Home from "./elephant/components/Home";
 import ExamSummary, { type ExamResult } from "./elephant/components/ExamSummary";
+import QuizScreen from "./elephant/components/quiz/QuizScreen";
 import { Theory, Quiz, Scenario, Flashcards } from "./elephant/components/steps";
 import { COURSES_DATA } from "./data/coursesData";
 import type { UserProgress, Step } from "./types/course";
@@ -15,7 +16,7 @@ const COURSE_KEY = "elephantology-current-course";
 const THEME_KEY = "elephantology-dark-theme";
 
 type ProgressStore = Record<string, UserProgress | undefined>;
-type View = "HOME" | "STEP" | "EXAM" | "EXAM_SUMMARY";
+type View = "HOME" | "STEP" | "EXAM" | "EXAM_SUMMARY" | "QUIZ";
 
 const FIRST_COURSE = COURSES_DATA[0]!;
 
@@ -271,6 +272,11 @@ export default function App() {
     window.scrollTo({ top: 0 });
   };
 
+  const startQuiz = () => {
+    setView("QUIZ");
+    window.scrollTo({ top: 0 });
+  };
+
   const currentExamStep = examQuestions[examIdx];
 
   const handleExamOptionPick = (optionIdx: number) => {
@@ -469,6 +475,7 @@ export default function App() {
           onSelectCourse={(id) => selectCourse(id)}
           onStartGlobalExam={startGlobalExam}
           onStartCourseExam={startCourseExam}
+          onStartQuiz={startQuiz}
         />
       )}
 
@@ -614,6 +621,8 @@ export default function App() {
           </nav>
         </>
       )}
+
+      {view === "QUIZ" && <QuizScreen onExit={() => setView("HOME")} />}
 
       {view === "EXAM_SUMMARY" && examResult && (
         <ExamSummary
