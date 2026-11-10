@@ -14,4 +14,18 @@ export default defineConfig({
       clientPort: 443,
     },
   },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    rollupOptions: {
+      external: [/\.test\.(ts|tsx)$/],
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          icons: ["lucide-react"],
+        },
+      },
+    },
+  },
 });
+
