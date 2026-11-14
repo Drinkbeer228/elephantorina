@@ -7,7 +7,7 @@
     "build": "vite build",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test \"src/**/*.test.ts\"",
+    "test": "node scripts/run-tests.mjs",
     "optimize:images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
