@@ -8,6 +8,7 @@ import { Theory, Quiz, Scenario, Flashcards } from "./elephant/components/steps"
 import { COURSES_DATA } from "./data/coursesData";
 import type { UserProgress, Step } from "./types/course";
 import { getLessonContext } from "./utils/courseUtils";
+import { lessonTarget, withoutLessonParams } from "./utils/deepLink";
 import { collectMistakes, stepsOf, checkUnlockedAchievements } from "./elephant/progress";
 import { isSoundEnabled, setSoundEnabled, playCorrect, playWrong, playClick } from "./elephant/sound";
 
@@ -423,6 +424,15 @@ export default function App() {
       window.scrollTo({ top: 0 });
     }
   };
+
+  // A link from another project (?course=…&lesson=…) opens that lesson once.
+  useEffect(() => {
+    const target = lessonTarget(window.location.search, COURSES_DATA);
+    if (!target) return;
+    selectCourse(target.courseId, target.stepId);
+    window.history.replaceState(window.history.state, "", withoutLessonParams(window.location.href));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const primaryLabel =
     step.type === "FLASHCARD"
