@@ -10,6 +10,7 @@ import { Terms } from '../ui/Terms';
 import { ListPage } from '../ui/ListPage';
 import { useProgress } from '../ui/useProgress';
 import { incomingHash, useRoute } from './router';
+import { postTitle } from './embed';
 
 // Ссылка из библиотеки (`?book=`) или старая ссылка на урок (`?course=&lesson=`) → маршрут в hash.
 // Выполняется до первого рендера, чтобы не мигала главная.
@@ -25,7 +26,9 @@ export default function App() {
   useEffect(() => {
     const titles: Record<string, string> = { home: 'Elephantorina · Research Station', list: 'Список · Elephantorina' };
     document.title = titles[route.kind] ?? 'Elephantorina';
-  }, [route.kind]);
+    const labels: Record<string, string> = { home: 'Главная', list: 'Список вопросов', book: 'Книга', terms: 'Термины', test: route.kind === 'test' && route.mode === 'exam' ? 'Зачёт' : 'Тренировка' };
+    postTitle(labels[route.kind] ?? 'Elephantorina');
+  }, [route]);
 
   return (
     <Shell mistakes={mistakes(progress).size}>
