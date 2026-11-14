@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test \"src/**/*.test.ts\"",
+    "test": "node scripts/run-tests.mjs",
     "coverage": "tsx scripts/coverage.ts",
     "sync:catalog": "node scripts/sync-catalog.mjs"
   },
