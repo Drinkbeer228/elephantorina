@@ -1,0 +1,512 @@
+{
+  "generatedAt": "2026-11-07T21:44:57.564Z",
+  "source": {
+    "commit": "40b2c863",
+    "site": "https://drinkbeer228.github.io/elephantology/"
+  },
+  "disciplines": [
+    {
+      "id": "taxonomy",
+      "name": "Таксономия и Эволюция",
+      "order": 1,
+      "description": "Систематика хоботных, филогения, классификация видов и эволюционные ветви."
+    },
+    {
+      "id": "anatomy",
+      "name": "Анатомия и Физиология",
+      "order": 2,
+      "description": "Морфология хобота, бивней, зубной системы, опорно-двигательный аппарат и терморегуляция."
+    },
+    {
+      "id": "ethogram",
+      "name": "Этология и Поведение",
+      "order": 3,
+      "description": "Матриархальная структура, инфразвуковая коммуникация, ритуалы и социальная иерархия."
+    },
+    {
+      "id": "cognition",
+      "name": "Когнитивистика и Память",
+      "order": 4,
+      "description": "Зеркальный тест самосознания, долговременная топографическая память и орудийная деятельность."
+    },
+    {
+      "id": "veterinary",
+      "name": "Ветеринария и Патологии",
+      "order": 5,
+      "description": "Эндотелиотропный герпесвирус (EEHV), пододерматиты, анестезиология и превентивная медицина."
+    },
+    {
+      "id": "ecology",
+      "name": "Экология и Среда обитания",
+      "order": 6,
+      "description": "Средообразующая роль мегагербиворов, дисперсия семян, зоогенная гидрология и кормовой бюджет."
+    },
+    {
+      "id": "conservation",
+      "name": "Охрана и Сохранение видов",
+      "order": 7,
+      "description": "Борьба с браконьерством, фрагментация ареалов, коридоры миграции и мониторинг популяций."
+    },
+    {
+      "id": "culture",
+      "name": "Антропозоология и Культура",
+      "order": 8,
+      "description": "Слоны в мифологии, религиях Востока, военном деле античности и этика сосуществования."
+    },
+    {
+      "id": "paleontology",
+      "name": "Палеонтология и Ископаемые",
+      "order": 9,
+      "description": "Мамонтовая фауна, мастодонты, гомфотерии, дейнотерии и островная карликовость."
+    },
+    {
+      "id": "genomics",
+      "name": "Геномика и Молекулярная биология",
+      "order": 10,
+      "description": "Парадокс Пето, ген TP53, древняя ДНК мамонтов и эпигенетические адаптации."
+    }
+  ],
+  "books": [
+    {
+      "id": "taxonomy/deinotheriidae-evolution-and-functional-morphology",
+      "discipline": "taxonomy",
+      "title": "Эволюционная радиация, краниодентальная биомеханика и палеоэкология Deinotheriidae",
+      "shortTitle": "Эволюционная радиация, краниодентальная",
+      "readingMinutes": 15
+    },
+    {
+      "id": "taxonomy/gomphotheriidae-and-amebelodontidae-evolution",
+      "discipline": "taxonomy",
+      "title": "Эволюционная радиация и биомеханика Gomphotheriidae и Amebelodontidae",
+      "shortTitle": "Эволюционная радиация и биомеханика",
+      "readingMinutes": 15
+    },
+    {
+      "id": "taxonomy/mammuthus-evolution-and-island-dwarfism",
+      "discipline": "taxonomy",
+      "title": "Эволюционная радиация рода Mammuthus и биомеханика островной карликовости",
+      "shortTitle": "Эволюционная радиация рода Mammuthus",
+      "readingMinutes": 15
+    },
+    {
+      "id": "taxonomy/mammutidae-vs-elephantidae-evolution-and-biomechanics",
+      "discipline": "taxonomy",
+      "title": "Филогенетическая дивергенция, краниодентальная биомеханика и палеоэкология Mammutidae",
+      "shortTitle": "Филогенетическая дивергенция",
+      "readingMinutes": 15
+    },
+    {
+      "id": "taxonomy/palaeoloxodon-evolution-and-gigantism",
+      "discipline": "taxonomy",
+      "title": "Эволюционная радиация, краниальная архитектоника и экстремальный гигантизм рода Palaeoloxodon: биомеханика parieto-occipital crest, азиатский P. namadicus и сицилийский P. falconeri",
+      "shortTitle": "Эволюционная радиация, краниальная",
+      "readingMinutes": 12
+    },
+    {
+      "id": "taxonomy/proboscidea-early-evolution-and-stem-groups",
+      "discipline": "taxonomy",
+      "title": "Базальная радиация и ранняя эволюция отряда Proboscidea в палеогене: от базальных афротериев к полуводным эоценовым формам",
+      "shortTitle": "Базальная радиация и ранняя эволюция",
+      "readingMinutes": 15
+    },
+    {
+      "id": "taxonomy/proboscidea-evolution-and-phylogeny",
+      "discipline": "taxonomy",
+      "title": "Филогения и макроэволюция хоботных (Proboscidea): от меритерия (Moeritherium) до современных линий Loxodonta и Elephas",
+      "shortTitle": "Филогения и макроэволюция хоботных",
+      "readingMinutes": 15
+    },
+    {
+      "id": "taxonomy/proboscidea-paleontology-and-trunk-evolution",
+      "discipline": "taxonomy",
+      "title": "Палеонтология и филогенетическая радиация Proboscidea: эволюция хобота, моляров и гигантизм",
+      "shortTitle": "Палеонтология и филогенетическая",
+      "readingMinutes": 17
+    },
+    {
+      "id": "anatomy/cardiovascular-system-and-hemodynamics",
+      "discipline": "anatomy",
+      "title": "Клиническая кардиология, сосудистая архитектоника и гравитационная гемодинамика Elephantidae: бифидный миокард, вазомоторная терморегуляция ушных раковин и венозный возврат",
+      "shortTitle": "Клиническая кардиология, сосудистая",
+      "readingMinutes": 15
+    },
+    {
+      "id": "anatomy/digestive-system-macroanatomy-and-vascularization",
+      "discipline": "anatomy",
+      "title": "Клиническая макроанатомия, синтопия и сосудистая архитектоника желудочно-кишечного тракта Elephantidae: топография слепой кишки, брыжеечные артериальные сплетения и хирургическая топография брюшной полости",
+      "shortTitle": "Клиническая макроанатомия, синтопия",
+      "readingMinutes": 15
+    },
+    {
+      "id": "anatomy/integumentary-system-and-skin-morphology",
+      "discipline": "anatomy",
+      "title": "Клиническая дерматология, гистологическая архитектоника и физика терморегуляции покровной системы у Elephantidae",
+      "shortTitle": "Клиническая дерматология",
+      "readingMinutes": 15
+    },
+    {
+      "id": "anatomy/microbiome-and-hindgut-fermentation",
+      "discipline": "anatomy",
+      "title": "Физиология ферментации в толстом кишечнике (Hindgut Fermentation), микробиомная архитектоника и биохимия летучих жирных кислот у Elephantidae: симбиотический метаболизм и кинетика гидролиза лигноцеллюлозы",
+      "shortTitle": "Физиология ферментации в толстом",
+      "readingMinutes": 14
+    },
+    {
+      "id": "anatomy/muscular-hydrostat-and-trunk-biomechanics",
+      "discipline": "anatomy",
+      "title": "Клиническая миология, биомеханика мышечного гидростата и нейросенсорный контроль хобота (Proboscis) у Elephantidae: архитектоника мышечных пучков, гидростатический скелет и микроманипуляция",
+      "shortTitle": "Клиническая миология, биомеханика",
+      "readingMinutes": 11
+    },
+    {
+      "id": "anatomy/respiratory-system-and-vocal-tract",
+      "discipline": "anatomy",
+      "title": "Клиническая пульмонология, биофизика дыхания и анатомия вокального тракта Elephantidae: облитерация плевральной полости, механика сноркелинга и акустическая архитектоника гортани",
+      "shortTitle": "Клиническая пульмонология, биофизика",
+      "readingMinutes": 13
+    },
+    {
+      "id": "anatomy/sensory-umwelt-and-multimodal-perception",
+      "discipline": "anatomy",
+      "title": "Сенсорный умвельт (Umwelt) и мультимодальная нейрофизиология Elephantidae",
+      "shortTitle": "Сенсорный умвельт (Umwelt",
+      "readingMinutes": 12
+    },
+    {
+      "id": "anatomy/skeletal-system-appendicular-and-biomechanics",
+      "discipline": "anatomy",
+      "title": "Клиническая остеология, гравипортальная биомеханика и анатомия локомоторного аппарата Elephantidae: колоннообразный скелет, препустепная дигитиградия и феномен ложного шестого пальца (Prepux)",
+      "shortTitle": "Клиническая остеология, гравипортальная",
+      "readingMinutes": 13
+    },
+    {
+      "id": "anatomy/skeletal-system-cranial-and-dentition",
+      "discipline": "anatomy",
+      "title": "Клиническая краниология, остеологическая архитектоника и стоматологическая биомеханика Elephantidae: пневматизация диплоэ, альвеолярные ложа бивней и кинематика горизонтальной полифиодонтии",
+      "shortTitle": "Клиническая краниология, остеологическая",
+      "readingMinutes": 15
+    },
+    {
+      "id": "anatomy/urogenital-system-and-reproductive-anatomy",
+      "discipline": "anatomy",
+      "title": "Клиническая урология, репродуктивная анатомия и эндокринология Elephantidae",
+      "shortTitle": "Клиническая урология, репродуктивная",
+      "readingMinutes": 13
+    },
+    {
+      "id": "ethogram/aggression-dominance-and-reconciliation",
+      "discipline": "ethogram",
+      "title": "Иерархия доминирования, ритуализированная агрессия и постконфликтное примирение у Elephantidae: демонстрация силы, турнирные поединки и аффилиация",
+      "shortTitle": "Иерархия доминирования",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/chemosensory-communication-and-vomeronasal-system",
+      "discipline": "ethogram",
+      "title": "Хемосенсорная коммуникация, архитектоника вомероназального органа (Органа Якобсона) и биохимия феромонов у Elephantidae: морфология хоботно-небного тракта, реакция флемен (Flehmen) и детекция репродуктивного статуса",
+      "shortTitle": "Хемосенсорная коммуникация",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/comprehensive-ethogram-behavioral-catalogue",
+      "discipline": "ethogram",
+      "title": "Систематический этологический каталог и поведенческий репертуар Elephantidae: стандартизированная классификация паттернов покоя, локомоции, комфорта, аффилиации и защиты",
+      "shortTitle": "Систематический этологический каталог",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/fission-fusion-social-structure",
+      "discipline": "ethogram",
+      "title": "Многоуровневая социальная структура и динамика деления-объединения (Fission-Fusion) у Elephantidae",
+      "shortTitle": "Многоуровневая социальная структура",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/inbreeding-avoidance-and-mate-choice",
+      "discipline": "ethogram",
+      "title": "Этологические механизмы избегания инбридинга, половой отбор и динамика расселения у Elephantidae",
+      "shortTitle": "Этологические механизмы избегания",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/musth-ethology-and-endocrinology",
+      "discipline": "ethogram",
+      "title": "Феноменология и этология муста у самцов Elephantidae: гормональный шторм, хемокоммуникация темпорина, иерархическое доминирование и аномалии поведения",
+      "shortTitle": "Феноменология и этология муста у самцов",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/seismic-and-infrasonic-communication",
+      "discipline": "ethogram",
+      "title": "Биофизика инфразвуковой и сейсмической коммуникации Elephantidae: волны Рэлея, форманты вокального тракта и пространственная триангуляция",
+      "shortTitle": "Биофизика инфразвуковой и сейсмической",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ethogram/trauma-and-social-learning-breakdown",
+      "discipline": "ethogram",
+      "title": "Психосоциальная травма, срыв социального обучения и распад традиционной культуры у Elephantidae: феноменология слоновьего ПТСР, утрата институциональной памяти матриархов и девиантное поведение",
+      "shortTitle": "Психосоциальная травма, срыв социального",
+      "readingMinutes": 15
+    },
+    {
+      "id": "cognition/cognitive-architecture-and-self-awareness",
+      "discipline": "cognition",
+      "title": "Когнитивная архитектура, зеркальное самосознание (MSR) и нейробиология высших психических функций у Elephantidae",
+      "shortTitle": "Когнитивная архитектура, зеркальное",
+      "readingMinutes": 15
+    },
+    {
+      "id": "cognition/cognitive-thanatology-empathy-and-grief-rituals",
+      "discipline": "cognition",
+      "title": "Когнитивная танатология, эмпатические коалиции и ритуалы скорби у Elephantidae: нейробиологические механизмы распознавания смерти и этология утешения",
+      "shortTitle": "Когнитивная танатология, эмпатические",
+      "readingMinutes": 16
+    },
+    {
+      "id": "cognition/cooperation-and-problem-solving",
+      "discipline": "cognition",
+      "title": "Когнитивная этология и кооперативное поведение Elephantidae: парадигма совместного вытягивания каната, орудийная деятельность и спонтанный инсайт",
+      "shortTitle": "Когнитивная этология и кооперативное",
+      "readingMinutes": 15
+    },
+    {
+      "id": "cognition/empathy-and-mourning-rituals",
+      "discipline": "cognition",
+      "title": "Эволюционная танатология и эмпатия у Elephantidae: интерес к останкам сородичей, ритуалы погребения и утешительное поведение",
+      "shortTitle": "Эволюционная танатология и эмпатия",
+      "readingMinutes": 15
+    },
+    {
+      "id": "cognition/neuroanatomy-brain-architecture-and-memory",
+      "discipline": "cognition",
+      "title": "Клиническая нейроанатомия, цитоархитектоника коры и нейробиологические основы долговременной памяти у Elephantidae: гиппокампальный комплекс, гирификация, височные доли и латерализация",
+      "shortTitle": "Клиническая нейроанатомия",
+      "readingMinutes": 15
+    },
+    {
+      "id": "cognition/spatial-cognition-mental-maps-and-navigation",
+      "discipline": "cognition",
+      "title": "Пространственный интеллект, ментальные карты и когнитивная экология Elephantidae: навигационные алгоритмы матриархов",
+      "shortTitle": "Пространственный интеллект, ментальные",
+      "readingMinutes": 15
+    },
+    {
+      "id": "veterinary/chemical-immobilization-and-anesthesia",
+      "discipline": "veterinary",
+      "title": "Клиническая анестезиология и полевая химическая иммобилизация Elephantidae: протоколы сверхактивных опиоидов, антагонистическая десатурация и профилактика позиционного кардиореспираторного коллапса",
+      "shortTitle": "Клиническая анестезиология и полевая",
+      "readingMinutes": 15
+    },
+    {
+      "id": "veterinary/clinical-podiatry-and-foot-care",
+      "discipline": "veterinary",
+      "title": "Клиническая подиатрия, ортопедическая патология и протоколы ветеринарного ухода за стопой Elephantidae: пододерматиты, абсцессы подошвы, трещины слиппера и хирургическая расчистка",
+      "shortTitle": "Клиническая подиатрия, ортопедическая",
+      "readingMinutes": 15
+    },
+    {
+      "id": "veterinary/clinical-welfare-and-protected-contact",
+      "discipline": "veterinary",
+      "title": "Клиническое благополучие, этологический аудит и менеджмент безопасного взаимодействия с Elephantidae: система Protected Contact (PC), позитивное подкрепление (PRT) и когнитивное обогащение среды",
+      "shortTitle": "Клиническое благополучие, этологический",
+      "readingMinutes": 15
+    },
+    {
+      "id": "veterinary/eehv-endotheliotropic-herpesvirus-protocols",
+      "discipline": "veterinary",
+      "title": "Клиническая вирусология, патогенез эндотелиального коллапса и протоколы интенсивной терапии эндотелиотропного герпесвируса слонов (EEHV / Elephant Endotheliotropic Herpesvirus)",
+      "shortTitle": "Клиническая вирусология, патогенез",
+      "readingMinutes": 15
+    },
+    {
+      "id": "veterinary/elephant-neonatology-and-calves",
+      "discipline": "veterinary",
+      "title": "Клиническая неонатология и интенсивная терапия слонят: физиология родов, биохимия молока, искусственное вскармливание и протоколы выхаживания сирот",
+      "shortTitle": "Клиническая неонатология и интенсивная",
+      "readingMinutes": 15
+    },
+    {
+      "id": "veterinary/gastrointestinal-physiology-and-colic",
+      "discipline": "veterinary",
+      "title": "Физиология пищеварения, ферментация в толстом кишечнике и гастроэнтерологические патологии слонов",
+      "shortTitle": "Физиология пищеварения, ферментация",
+      "readingMinutes": 12
+    },
+    {
+      "id": "ecology/climate-change-and-range-dynamics",
+      "discipline": "ecology",
+      "title": "Биогеография и климатическое моделирование ареалов хоботных: прогнозирование сокращения пригодных биотопов к 2070 году (MaxEnt, IPCC SSP-сценарии) и управление рефугиумами",
+      "shortTitle": "Биогеография и климатическое",
+      "readingMinutes": 12
+    },
+    {
+      "id": "ecology/comparative-genomics-and-cancer-resistance",
+      "discipline": "ecology",
+      "title": "Сравнительная геномика слоновых: парадокс Пето, копийность TP53 и ген LIF6",
+      "shortTitle": "Сравнительная геномика слоновых",
+      "readingMinutes": 16
+    },
+    {
+      "id": "ecology/ecosystem-breakdown-syndrome",
+      "discipline": "ecology",
+      "title": "Синдром популяционного и экосистемного распада у Elephantidae: нейробиология трансгенерационной травмы, утрата социальной культуры и каскадные трофические эффекты",
+      "shortTitle": "Синдром популяционного и экосистемного",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ecology/ecosystem-engineers-and-keystone-ecology",
+      "discipline": "ecology",
+      "title": "Хоботные как ключевые инженеры экосистем: модификация ландшафтов, зоохория крупных семян и гидрологическое бурение",
+      "shortTitle": "Хоботные как ключевые инженеры экосистем",
+      "readingMinutes": 12
+    },
+    {
+      "id": "ecology/feeding-ecology-nutrition-and-geophagy",
+      "discipline": "ecology",
+      "title": "Экология питания, трофическая избирательность и биогеохимия геофагии у Elephantidae: browse vs graze, солевые лизунцы (salt licking), минеральный баланс и кинетика фуражирования",
+      "shortTitle": "Экология питания, трофическая",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ecology/ontogeny-and-life-history",
+      "discipline": "ecology",
+      "title": "Онтогенез, эволюционная стратегия жизненного цикла (Life History Theory) и возрастная демография у Elephantidae: неонатальный период, половой диморфизм соматического роста и гериатрия",
+      "shortTitle": "Онтогенез, эволюционная стратегия",
+      "readingMinutes": 15
+    },
+    {
+      "id": "ecology/paleoecology-and-megafaunal-extinction",
+      "discipline": "ecology",
+      "title": "Позднеплейстоценовое вымирание хоботных (Quaternary Megafauna Extinction): климатическая перестройка, гипотеза антропогенного оверкилла (Overkill) и коллапс мамонтовой степи",
+      "shortTitle": "Позднеплейстоценовое вымирание хоботных",
+      "readingMinutes": 13
+    },
+    {
+      "id": "ecology/thermoregulation-and-climate-stress-biophysics",
+      "discipline": "ecology",
+      "title": "Экологическая физиология и биофизика выживания в экстремальном климате: механизмы защиты Elephantidae от гипертермии и обезвоживания",
+      "shortTitle": "Экологическая физиология и биофизика",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/cites-mike-and-anti-poaching-monitoring",
+      "discipline": "conservation",
+      "title": "Мониторинг CITES, программа MIKE и криминалистика браконьерства слоновой кости",
+      "shortTitle": "Мониторинг CITES, программа MIKE",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/climate-change-and-range-shift-projections",
+      "discipline": "conservation",
+      "title": "Климатические модели и прогнозирование сокращения ареалов хоботных до 2100 года",
+      "shortTitle": "Климатические модели и прогнозирование",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/human-elephant-conflict-mitigation",
+      "discipline": "conservation",
+      "title": "Экология и поведенческий менеджмент конфликта «человек — слон» (HEC): агроэкологические барьеры, биодетерренция и предиктивные ГИС-модели",
+      "shortTitle": "Экология и поведенческий менеджмент",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/ivory-trade-and-forensic-genetics",
+      "discipline": "conservation",
+      "title": "Криминалистическая генетика, стабильно-изотопный анализ и динамика нелегального оборота слоновой кости: методы отслеживания браконьерских синдикатов",
+      "shortTitle": "Криминалистическая генетика",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/population-genetics-and-phylogeography",
+      "discipline": "conservation",
+      "title": "Популяционная генетика, филогеография и геномика сохранения Elephantidae: митохондриально-ядерная дискордантность, аллельное разнообразие и популяционная структура метапопуляций",
+      "shortTitle": "Популяционная генетика, филогеография",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/spatial-ecology-and-connectivity-corridors",
+      "discipline": "conservation",
+      "title": "Пространственная экология, спутниковая телеметрия и ландшафтная связность у Elephantidae: расчет домашних ареалов, модели Least-Cost Path и проектирование миграционных коридоров",
+      "shortTitle": "Пространственная экология, спутниковая",
+      "readingMinutes": 15
+    },
+    {
+      "id": "conservation/translocation-reintroduction-and-metapopulations",
+      "discipline": "conservation",
+      "title": "Транслокация, реинтродукция и управление метапопуляциями Elephantidae",
+      "shortTitle": "Транслокация, реинтродукция и управление",
+      "readingMinutes": 16
+    },
+    {
+      "id": "culture/china-elephant-retreat-and-environmental-history",
+      "discipline": "culture",
+      "title": "Экологическая история и 3000-летнее отступление азиатского слона (Elephas maximus) в Китае: трансформация ландшафтов, климатический сдвиг и рефугиум в провинции Юньнань",
+      "shortTitle": "Экологическая история и 3000-летнее",
+      "readingMinutes": 15
+    },
+    {
+      "id": "culture/historical-anthropology-and-cultural-domestication",
+      "discipline": "culture",
+      "title": "Историческая антропология и культурная доместикация: от боевых элефантерий античности до института махаутов",
+      "shortTitle": "Историческая антропология и культурная",
+      "readingMinutes": 14
+    },
+    {
+      "id": "culture/historical-ivory-trade-and-exploitation",
+      "discipline": "culture",
+      "title": "Исторический трафик слоновой кости: от палеолитического искусства резьбы до глобального кризиса дериватов XIX–XX веков",
+      "shortTitle": "Исторический трафик слоновой кости",
+      "readingMinutes": 16
+    },
+    {
+      "id": "culture/sacred-white-elephants-inbreeding-and-captive-genetics",
+      "discipline": "culture",
+      "title": "Сакральные «белые слоны» Юго-Восточной Азии: генетика лейкизма, селекционный инбридинг и популяционный тупик captive-разведения",
+      "shortTitle": "Сакральные «белые слоны» Юго-Восточной",
+      "readingMinutes": 16
+    },
+    {
+      "id": "culture/war-elephants-history-tactics-and-veterinary",
+      "discipline": "culture",
+      "title": "Боевые слоны в военном искусстве античности и средневекового Востока: селекция видов, тактическое применение, психология паники и полевая ветеринария",
+      "shortTitle": "Боевые слоны в военном искусстве",
+      "readingMinutes": 15
+    },
+    {
+      "id": "paleontology/isotopic-paleoecology-of-pleistocene-megafauna",
+      "discipline": "paleontology",
+      "title": "Изотопная палеоэкология плейстоценовой мегафауны: реконструкция диеты, миграций и климата мамонтовых степей по изотопам эмали щечных зубов",
+      "shortTitle": "Изотопная палеоэкология плейстоценовой",
+      "readingMinutes": 17
+    },
+    {
+      "id": "paleontology/paleogenomics-vs-paleoproteomics-systematics",
+      "discipline": "paleontology",
+      "title": "Палеогеномика vs палеопротеомика: разрешение филогенетических споров в систематике Proboscidea",
+      "shortTitle": "Палеогеномика vs палеопротеомика",
+      "readingMinutes": 17
+    },
+    {
+      "id": "paleontology/skeletal-paleopathology-and-biomechanics",
+      "discipline": "paleontology",
+      "title": "Палеопатологии скелета древних Proboscidea: биомеханика травм, следы палеолитической охоты и сенильные дегенерации в ископаемой летописи",
+      "shortTitle": "Палеопатологии скелета древних",
+      "readingMinutes": 16
+    },
+    {
+      "id": "genomics/epigenetic-clocks-dna-methylation-and-aging",
+      "discipline": "genomics",
+      "title": "Эпигенетическая регуляция развития, метилирование ДНК и молекулярные часы старения у Elephantidae",
+      "shortTitle": "Эпигенетическая регуляция развития",
+      "readingMinutes": 16
+    },
+    {
+      "id": "genomics/mhc-immunogenomics-and-eehv-resistance",
+      "discipline": "genomics",
+      "title": "Иммуногеномика Elephantidae: эволюция главного комплекса гистосовместимости (MHC) и генетические механизмы устойчивости к герпесвирусу EEHV",
+      "shortTitle": "Иммуногеномика Elephantidae",
+      "readingMinutes": 16
+    }
+  ]
+}

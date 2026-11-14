@@ -1,5 +1,7 @@
 {
-  "name": "Слонология.EDU",
-  "description": "Слонология.EDU — интерактивная PWA-платформа для обучения анатомии и физиологии слонов",
-  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "name": "Elephantorina",
+  "description": "Экзаменационный зал Elephant Research Station: тесты, случаи и термины по книгам библиотеки «Слонологии».",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
