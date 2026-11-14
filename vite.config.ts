@@ -17,12 +17,13 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    // Старый курс (src/bank/legacy) везёт с собой теорию; вопросы из него берутся при сборке банка.
+    chunkSizeWarningLimit: 900,
     rollupOptions: {
       external: [/\.test\.(ts|tsx)$/],
       output: {
         manualChunks: {
           vendor: ["react", "react-dom"],
-          icons: ["lucide-react"],
         },
       },
     },
