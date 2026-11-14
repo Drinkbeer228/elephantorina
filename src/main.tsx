@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
+import './app/embed';
 import './app/styles.css';
 import App from './app/App';
 

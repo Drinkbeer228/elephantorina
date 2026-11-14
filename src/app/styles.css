@@ -523,3 +523,13 @@ a {
     transition: none !important;
   }
 }
+
+/* Внутри Research Station: станция передаёт «меньше движения» в init (src/app/embed.ts). */
+.ers-reduced-motion *,
+.ers-reduced-motion *::before,
+.ers-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
