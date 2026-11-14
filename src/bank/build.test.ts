@@ -1,15 +1,37 @@
+import { readdirSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import catalog from './books.json' with { type: 'json' };
 import { COURSES_DATA } from './legacy/coursesData';
+import { QUIZ_QUESTIONS } from './legacy/quizData';
 import { LESSON_LINKS } from './lessonLinks';
 import { buildBank, testQuestions, termQuestions, lessonToBook, type Catalog } from './build';
 import { coverage } from './coverage';
+import type { TopicFile } from './types';
 
-const bank = buildBank({ catalog: catalog as Catalog, courses: COURSES_DATA, links: LESSON_LINKS, files: [] });
+const topicsDir = new URL('./topics/', import.meta.url);
+const topicFiles: { path: string; topic: TopicFile }[] = [];
+for (const f of readdirSync(topicsDir).filter((f) => f.endsWith('.ts')).sort()) {
+  topicFiles.push({ path: `src/bank/topics/${f}`, topic: (await import(new URL(f, topicsDir).href)).default });
+}
 
-test('every lesson link points to a book in the catalog', () => {
+const bank = buildBank({
+  catalog: catalog as Catalog,
+  courses: COURSES_DATA,
+  links: LESSON_LINKS,
+  files: topicFiles,
+  extraLoose: QUIZ_QUESTIONS.map((q) => ({
+    origin: `общая викторина / ${q.category}`,
+    question: { kind: 'choice', id: q.id, prompt: q.question, options: q.options, answer: q.correctIndex, explanation: q.explanation },
+  })),
+});
+
+test('every lesson link and topic file points to a book in the catalog without problems', () => {
   assert.deepEqual(bank.problems, []);
+});
+
+test('all catalog books are covered by tests', () => {
+  assert.equal(bank.topics.size, (catalog as Catalog).books.length);
 });
 
 test('lesson links are unique per lesson', () => {
@@ -73,4 +95,28 @@ test('topic files are merged and unknown books are reported', () => {
   });
   assert.equal(b.topics.get('genomics/epigenetic-clocks-dna-methylation-and-aging')!.questions.length, 1);
   assert.equal(b.problems.length, 1);
+});
+
+test('topic file questions have valid content and supported inline markup', () => {
+  for (const { path, topic } of topicFiles) {
+    assert.ok((topic.questions?.length ?? 0) > 0, `${path} has no questions`);
+    for (const q of topic.questions ?? []) {
+      assert.ok(q.prompt.trim().length > 0, `${q.id} empty prompt`);
+      assert.ok(q.explanation.trim().length > 0, `${q.id} empty explanation`);
+      const optTexts = q.kind === 'choice' ? q.options : q.options.map((o) => o.text);
+      assert.equal(new Set(optTexts).size, optTexts.length, `${q.id} duplicate options`);
+      for (const txt of [q.prompt, q.explanation, ...optTexts]) {
+        const dollars = txt.match(/\$/g) ?? [];
+        assert.equal(dollars.length % 2, 0, `${q.id} unbalanced $ in ${txt}`);
+        for (const m of txt.matchAll(/\$([^$\n]+)\$/g)) {
+          const stripped = m[1]!
+            .replace(/\\frac\{[^}]+\}\{[^}]+\}/g, '')
+            .replace(/\\(times|pm|approx|delta|ge(q)?|le(q)?|rightarrow|to|%)/g, '')
+            .replace(/\\text\{[^}]+\}/g, '')
+            .replace(/\\\s+/g, ' ');
+          assert.ok(!/\\[a-zA-Z]+/.test(stripped), `${q.id} unsupported TeX in ${m[0]}`);
+        }
+      }
+    }
+  }
 });
