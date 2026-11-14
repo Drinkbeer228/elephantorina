@@ -29,7 +29,7 @@ export default function App() {
 
   return (
     <Shell mistakes={mistakes(progress).size}>
-      {route.kind === 'home' && <Home progress={progress} />}
+      {route.kind === 'home' && <Home progress={progress} update={update} />}
       {route.kind === 'book' && <TopicPage id={route.id} progress={progress} />}
       {route.kind === 'terms' && <Terms id={route.id} />}
       {route.kind === 'test' && <TestRunner route={route} progress={progress} update={update} />}

@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import { BANK } from '../bank';
 import { catalogUrl } from '../app/station';
 import { mistakes as mistakeIds, topicStatus, type Progress } from '../test/progress';
+import { Transfer } from './Transfer';
 import { Icon, Link, bookLabel, discColor, plural, topicCounts } from './common';
 
-export function Home({ progress }: { progress: Progress }) {
+export function Home({ progress, update }: { progress: Progress; update: (fn: (p: Progress) => Progress) => void }) {
   const [q, setQ] = useState('');
   const query = q.trim().toLowerCase();
 
@@ -41,7 +42,7 @@ export function Home({ progress }: { progress: Progress }) {
         <div className="mt-6 flex flex-wrap gap-2">
           <span className="tag line num">{plural(BANK.topics.size, 'книга', 'книги', 'книг')} с тестами из {BANK.catalog.books.length}</span>
           <span className="tag line num">{plural(questionTotal, 'вопрос', 'вопроса', 'вопросов')}</span>
-          {passed > 0 && <span className="tag ok num">сдано {passed}</span>}
+          {passed > 0 && <span className="tag ok num">зачётов сдано: {passed}</span>}
         </div>
       </section>
 
@@ -85,7 +86,7 @@ export function Home({ progress }: { progress: Progress }) {
                 <Link key={id} to={{ kind: 'book', id }} className="pill" style={{ height: 'auto', padding: '9px 12px' }}>
                   <span className="dot" style={{ color: discColor(b.discipline) }} />
                   <span className="max-w-[220px] truncate">{bookLabel(b)}</span>
-                  <span className={`tag ${r.passed ? 'ok' : ''} num`}>{r.last}%</span>
+                  {r.passed && <span className="tag ok num"><Icon name="check" size={13} />{r.best}%</span>}
                 </Link>
               );
             })}
@@ -139,8 +140,12 @@ export function Home({ progress }: { progress: Progress }) {
                               {c.cases > 0 && ` · ${plural(c.cases, 'случай', 'случая', 'случаев')}`}
                             </div>
                           </div>
-                          {st === 'passed' && <span className="tag ok"><Icon name="check" size={13} />{rec?.best}%</span>}
-                          {st === 'started' && <span className="tag num">{rec?.last}%</span>}
+                          {st === 'passed' && (
+                            <span className="tag ok num" title="Зачёт сдан">
+                              <Icon name="check" size={13} />
+                              <span className="hidden sm:inline">Зачёт сдан ·</span> {rec?.best}%
+                            </span>
+                          )}
                           <Icon name="arrow-right" />
                         </Link>
                       );
@@ -157,6 +162,7 @@ export function Home({ progress }: { progress: Progress }) {
             ))}
         </div>
       </section>
+      <Transfer progress={progress} update={update} />
     </main>
   );
 }

@@ -4,7 +4,7 @@ import { testQuestions } from '../bank/build';
 import type { Question } from '../bank/types';
 import { href, navigate, type Route } from '../app/router';
 import { bookUrl } from '../app/station';
-import { mistakes as mistakeIds, recordSummary, type Progress } from '../test/progress';
+import { mistakes as mistakeIds, recordSummary, seen, type Progress } from '../test/progress';
 import {
   answeredCount,
   createSession,
@@ -34,7 +34,8 @@ function poolFor(route: TestRoute, progress: Progress): { title: string; pool: Q
   const books = [...BANK.topics.keys()].filter((id) => !route.discipline || BANK.books.get(id)?.discipline === route.discipline);
   return {
     title: route.discipline ? `Смешанный тест · ${disciplineName(route.discipline)}` : 'Смешанный тест',
-    pool: books.flatMap((id) => testQuestions(BANK, id)),
+    // В общий смешанный тест идут и вопросы без привязки к книге — пока их не разобрали по книгам.
+    pool: [...books.flatMap((id) => testQuestions(BANK, id)), ...(route.discipline ? [] : BANK.loose.map((l) => l.question))],
     book: null,
   };
 }
@@ -51,7 +52,13 @@ export function TestRunner({ route, progress, update }: { route: TestRoute; prog
     setSummary(null);
     setSession(
       setup.pool.length
-        ? createSession(setup.pool, { mode: route.mode, size: setup.size, weak: route.scope === 'book' ? mistakeIds(progress) : undefined })
+        ? createSession(setup.pool, {
+            mode: route.mode,
+            size: setup.size,
+            // Сначала вопросы с ошибками, затем ещё не пройденные.
+            weak: route.scope === 'mistakes' ? undefined : mistakeIds(progress),
+            seen: route.scope === 'mistakes' ? undefined : seen(progress),
+          })
         : null,
     );
   }, [setup]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -60,10 +67,10 @@ export function TestRunner({ route, progress, update }: { route: TestRoute; prog
     (s: Session) => {
       const sum = summarize(s);
       setSummary(sum);
-      update((p) => recordSummary(p, sum, setup.book));
+      update((p) => recordSummary(p, sum, setup.book, route.mode));
       window.scrollTo({ top: 0 });
     },
-    [setup.book, update],
+    [setup.book, update, route.mode],
   );
 
   if (!setup.pool.length) {
@@ -324,14 +331,21 @@ function Result({
         <div>
           <div className="eyebrow">{title} · {mode === 'exam' ? 'зачёт' : 'тренировка'}</div>
           <h1 className="h1 mt-2">
-            {summary.passed ? (wrong.length === 0 ? 'Без единой ошибки' : 'Сдано') : 'Пока не сдано'}
+            {mode === 'exam'
+              ? summary.passed
+                ? 'Зачёт сдан'
+                : 'Зачёт не сдан'
+              : summary.passed
+                ? 'Тренировка пройдена'
+                : 'Стоит повторить'}
           </h1>
           <p className="lead mt-2">
             {summary.passed
               ? wrong.length
                 ? `Разберите ${plural(wrong.length, 'ошибку', 'ошибки', 'ошибок')} ниже — они попадут в «Работу над ошибками».`
                 : `Около ${plural(minutes, 'минуты', 'минут', 'минут')}.`
-              : `Нужно ${PASS_PERCENT}%. Перечитайте отмеченные места и попробуйте ещё раз.`}
+              : `Для зачёта нужно ${PASS_PERCENT}%. Перечитайте отмеченные места и попробуйте ещё раз.`}
+            {mode === 'practice' && book && ' Отметку «Зачёт сдан» ставит только режим зачёта.'}
           </p>
         </div>
       </section>

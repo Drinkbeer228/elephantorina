@@ -11,7 +11,7 @@ export function Shell({ children, mistakes }: { children: ReactNode; mistakes: n
             <span className="brand-mark" />
             Elephantorina
           </Link>
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
             {mistakes > 0 && (
               <Link to={{ kind: 'test', scope: 'mistakes', mode: 'practice' }} className="pill quiet" >
                 <span className="tag bad num">{mistakes}</span>
@@ -22,9 +22,9 @@ export function Shell({ children, mistakes }: { children: ReactNode; mistakes: n
               <Icon name="list" size={17} />
               <span className="hidden sm:inline">Список</span>
             </Link>
-            <a href={STATION_URL} className="pill">
+            <a href={STATION_URL} className="pill" aria-label="Вернуться на станцию">
               <Icon name="arrow-left" size={16} />
-              Станция
+              <span className="hidden min-[400px]:inline">Станция</span>
             </a>
           </div>
         </div>

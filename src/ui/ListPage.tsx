@@ -99,9 +99,9 @@ export function ListPage() {
 
       {c.unchecked.length > 0 && (
         <section className="mt-12">
-          <h2 className="h2">Сверить привязку</h2>
+          <h2 className="h2">Непроверенные привязки</h2>
           <p className="muted mt-1 mb-4 text-[14.5px]">
-            Эти уроки старого курса привязаны к книгам по названию. Правка — <code>src/bank/lessonLinks.ts</code>.
+            Эти уроки старого курса привязаны к книгам по названию модуля: тесты по ним работают, но пару стоит сверить с текстом книги. Правка — <code>src/bank/lessonLinks.ts</code>.
           </p>
           <div className="card-soft p-4 grid gap-2 text-[14px]">
             {c.unchecked.map((u) => (
@@ -119,10 +119,11 @@ export function ListPage() {
 
       {c.loose.length > 0 && (
         <section className="mt-12">
-          <h2 className="h2">Вопросы без книги</h2>
+          <h2 className="h2">Без привязки к книге</h2>
           <p className="muted mt-1 mb-4 text-[14.5px]">
-            {plural(c.loose.length, 'вопрос', 'вопроса', 'вопросов')} пока не попадают в тесты: сначала им нужна книга. Привязать
-            урок — строкой в <code>src/bank/lessonLinks.ts</code>, отдельный вопрос — перенести в файл темы.
+            Пул «Без привязки к книге»: {plural(c.loose.length, 'вопрос', 'вопроса', 'вопросов')}. Они участвуют в общем смешанном
+            тесте, но не в тестах по книгам. Привязать урок — строкой в <code>src/bank/lessonLinks.ts</code>, отдельный вопрос —
+            перенести в файл темы.
           </p>
           <div className="grid gap-2">
             {c.loose.map((l) => (

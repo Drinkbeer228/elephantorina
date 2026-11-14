@@ -51,6 +51,7 @@ html {
 }
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--ink);
   font: 400 16px/1.5 var(--ui);
@@ -131,6 +132,11 @@ a {
   border-radius: 3px;
   background: var(--terra);
   box-shadow: inset 0 0 0 1.6px var(--line);
+}
+@media (max-width: 400px) {
+  .pill {
+    padding: 0 11px;
+  }
 }
 .pill.quiet {
   border-color: transparent;

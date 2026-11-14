@@ -64,3 +64,18 @@ test('summary: unanswered count as wrong, pass threshold applies', () => {
   assert.equal(sum.passed, 80 >= PASS_PERCENT);
   assert.equal(sum.graded.filter((g) => g.pickedText === null).length, 1);
 });
+
+test('priority: mistakes, then unseen, then the rest', () => {
+  const pool = Array.from({ length: 20 }, (_, i) => choice('q' + i));
+  const weak = new Set(['q0']);
+  const seen = new Set(pool.map((q) => q.id).filter((id) => !['q5', 'q6', 'q7'].includes(id)));
+  for (let seed = 1; seed < 20; seed++) {
+    const ids = createSession(pool, { mode: 'practice', seed, size: 4, weak, seen }).items.map((i) => i.question.id).sort();
+    assert.deepEqual(ids, ['q0', 'q5', 'q6', 'q7']);
+  }
+});
+
+test('fewer questions than the size: all are taken', () => {
+  const pool = Array.from({ length: 7 }, (_, i) => choice('q' + i));
+  assert.equal(createSession(pool, { mode: 'exam', seed: 4, seen: new Set() }).items.length, 7);
+});

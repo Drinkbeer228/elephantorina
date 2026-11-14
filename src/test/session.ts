@@ -80,20 +80,23 @@ export function correctOriginal(q: Question): number {
 }
 
 /**
- * Собирает сессию. Вопросы с ошибками в прошлом идут первыми (если `weak` задан), затем остальные;
- * внутри групп — случайно. Варианты ответа перемешиваются.
+ * Собирает сессию до `size` вопросов (по умолчанию 12; если в пуле меньше — берутся все).
+ * Порядок отбора: сначала вопросы с ошибкой в прошлый раз (`weak`), затем ещё не пройденные
+ * (нет в `seen`), затем остальные; внутри групп — случайно. Варианты ответа перемешиваются.
  */
 export function createSession(
   pool: readonly Question[],
-  opts: { mode: Mode; size?: number; seed?: number; weak?: ReadonlySet<string> },
+  opts: { mode: Mode; size?: number; seed?: number; weak?: ReadonlySet<string>; seen?: ReadonlySet<string> },
 ): Session {
   const rand = rng(opts.seed ?? Date.now());
   const size = Math.max(1, Math.min(opts.size ?? DEFAULT_SIZE, pool.length));
-  const weak = opts.weak;
-  const first = weak ? shuffle(pool.filter((q) => weak.has(q.id)), rand) : [];
-  const rest = shuffle(weak ? pool.filter((q) => !weak.has(q.id)) : pool, rand);
-  const picked = [...first, ...rest].slice(0, size);
-  // Внутри выбранного порядок снова случайный, чтобы «слабые» не шли всегда в начале.
+  const weak = opts.weak ?? new Set<string>();
+  const seen = opts.seen;
+  const rank = (q: Question) => (weak.has(q.id) ? 0 : seen && !seen.has(q.id) ? 1 : 2);
+  const groups: Question[][] = [[], [], []];
+  for (const q of pool) groups[rank(q)]!.push(q);
+  const picked = groups.flatMap((g) => shuffle(g, rand)).slice(0, size);
+  // Внутри выбранного порядок снова случайный, чтобы приоритетные не шли всегда в начале.
   const items = shuffle(picked, rand).map((question) => ({
     question,
     order: shuffle(

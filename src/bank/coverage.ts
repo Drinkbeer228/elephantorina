@@ -84,7 +84,7 @@ export function coverageMarkdown(c: Coverage, generatedAt: string): string {
   for (const d of c.disciplines) for (const t of d.thin) L.push(`- [ ] \`${t.id}\` — ${t.own} своих, ${t.withTerms} с терминами — ${t.title}`);
   if (c.unchecked.length) {
     L.push('');
-    L.push('## Привязки уроков по названию — сверить с книгой');
+    L.push('## Непроверенные привязки (по названию модуля, работают — сверить с книгой)');
     L.push('');
     L.push('Правка — `src/bank/lessonLinks.ts`: поставить `checked: true` или перенести урок на другую книгу.');
     L.push('');
@@ -92,7 +92,7 @@ export function coverageMarkdown(c: Coverage, generatedAt: string): string {
   }
   if (c.loose.length) {
     L.push('');
-    L.push('## Вопросы без книги');
+    L.push('## Без привязки к книге (участвуют в общем смешанном тесте)');
     L.push('');
     for (const l of c.loose) {
       const text = l.question.kind === 'choice' ? l.question.prompt : l.question.title;

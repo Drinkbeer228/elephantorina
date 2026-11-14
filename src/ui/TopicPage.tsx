@@ -75,12 +75,18 @@ export function TopicPage({ id, progress }: { id: string; progress: Progress }) 
               </div>
               {rec && (
                 <div className="text-right">
-                  <div className={`tag ${rec.passed ? 'ok' : ''} num`}>
-                    {rec.passed && <Icon name="check" size={13} />}
-                    {rec.passed ? `сдано · лучший ${rec.best}%` : `последний ${rec.last}%`}
-                  </div>
-                  <div className="muted text-[12.5px] mt-1.5">
-                    {plural(rec.attempts, 'попытка', 'попытки', 'попыток')}, {formatDate(rec.at)}
+                  {rec.passed ? (
+                    <div className="tag ok num">
+                      <Icon name="check" size={13} /> Зачёт сдан · {rec.best}%
+                    </div>
+                  ) : rec.attempts > 0 ? (
+                    <div className="tag bad num">Зачёт не сдан · {rec.last}%</div>
+                  ) : null}
+                  <div className="muted text-[12.5px] mt-1.5 num">
+                    {rec.attempts > 0 && `${plural(rec.attempts, 'попытка', 'попытки', 'попыток')} зачёта`}
+                    {rec.attempts > 0 && rec.practiceLast !== undefined && ' · '}
+                    {rec.practiceLast !== undefined && `тренировка ${rec.practiceLast}%`}
+                    {`, ${formatDate(rec.at)}`}
                   </div>
                 </div>
               )}
